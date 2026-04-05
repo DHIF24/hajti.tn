@@ -10,7 +10,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-28">
           
@@ -25,11 +25,11 @@ export function Navbar() {
           </div>
 
           {/* Left Navigation */}
-          <div className="hidden lg:flex items-center space-x-8 text-[11px] tracking-[0.15em] uppercase text-gray-600 font-medium">
-            <Link to="/products" className="hover:text-black transition-colors">Tous les produits</Link>
-            <Link to="/products?category=decors" className="hover:text-black transition-colors">Décors</Link>
-            <Link to="/products?category=linge" className="hover:text-black transition-colors">Linge de maison</Link>
-            <Link to="/products?category=cuisine" className="hover:text-black transition-colors">Cuisine</Link>
+          <div className="hidden lg:flex items-center space-x-6 text-[15px] tracking-wide text-gray-600 font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            <Link to="/products" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Tous les produits</Link>
+            <Link to="/products?category=decors" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Décors</Link>
+            <Link to="/products?category=linge" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Linge de maison</Link>
+            <Link to="/products?category=cuisine" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Cuisine</Link>
           </div>
 
           {/* Logo */}
@@ -42,13 +42,13 @@ export function Navbar() {
           </div>
 
           {/* Right Navigation & Icons */}
-          <div className="hidden lg:flex items-center space-x-8 text-[11px] tracking-[0.15em] uppercase text-gray-600 font-medium">
-            <Link to="/products?category=art" className="hover:text-black transition-colors">Art de table</Link>
-            <Link to="/products?category=rangement" className="hover:text-black transition-colors">Rangement</Link>
-            <Link to="/products?category=meubles" className="hover:text-black transition-colors">Meubles</Link>
-            <Link to="/products?category=offres" className="hover:text-black transition-colors">Offres</Link>
+          <div className="hidden lg:flex items-center space-x-6 text-[15px] tracking-wide text-gray-600 font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            <Link to="/products?category=art" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Art de table</Link>
+            <Link to="/products?category=rangement" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Rangement</Link>
+            <Link to="/products?category=meubles" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Meubles</Link>
+            <Link to="/products?category=offres" className="px-2 py-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">Offres</Link>
             
-            <div className="flex items-center space-x-5 ml-8 border-l border-gray-200 pl-8">
+            <div className="flex items-center space-x-5 ml-6 border-l border-gray-200 pl-6">
               <Link to="/auth" className="text-gray-600 hover:text-black transition-colors">
                 <UserIcon className="w-5 h-5" strokeWidth={1.5} />
               </Link>
@@ -88,15 +88,15 @@ export function Navbar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg">
-          <div className="px-4 py-6 space-y-4 flex flex-col text-[11px] tracking-[0.15em] uppercase text-gray-600 font-medium">
-            <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Tous les produits</Link>
-            <Link to="/products?category=decors" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Décors</Link>
-            <Link to="/products?category=linge" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Linge de maison</Link>
-            <Link to="/products?category=cuisine" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Cuisine</Link>
-            <Link to="/products?category=art" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Art de table</Link>
-            <Link to="/products?category=rangement" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Rangement</Link>
-            <Link to="/products?category=meubles" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2 border-b border-gray-100">Meubles</Link>
-            <Link to="/products?category=offres" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-black transition-colors py-2">Offres</Link>
+          <div className="px-4 py-6 space-y-2 flex flex-col text-[16px] text-gray-600 font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Tous les produits</Link>
+            <Link to="/products?category=decors" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Décors</Link>
+            <Link to="/products?category=linge" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Linge de maison</Link>
+            <Link to="/products?category=cuisine" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Cuisine</Link>
+            <Link to="/products?category=art" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Art de table</Link>
+            <Link to="/products?category=rangement" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Rangement</Link>
+            <Link to="/products?category=meubles" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Meubles</Link>
+            <Link to="/products?category=offres" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors px-4 py-3 rounded-lg">Offres</Link>
           </div>
         </div>
       )}
