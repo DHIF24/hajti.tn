@@ -1,16 +1,48 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 import { Product } from '../../types';
-import { Plus, Trash2, Edit, Search } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Plus, Trash2, Edit, Search, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ProductForm } from './ProductForm';
 
 export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [quickAddLoading, setQuickAddLoading] = useState(false);
+
+  const handleQuickAdd = async () => {
+    setQuickAddLoading(true);
+    try {
+      const dummyProduct = {
+        name: "Produit Test " + Math.floor(Math.random() * 1000),
+        description: "Description de test générée automatiquement",
+        price: 99.99,
+        category: "decors",
+        imageUrl: "https://picsum.photos/seed/test/800/800",
+        stock: 10,
+        rating: 5,
+        featured: false,
+        promotionPercentage: 0,
+        createdAt: new Date().toISOString()
+      };
+      await addDoc(collection(db, 'products'), dummyProduct);
+      alert("Produit test ajouté avec succès !");
+      fetchProducts();
+    } catch (err: any) {
+      console.error("Quick add failed:", err);
+      alert("Erreur Quick Add: " + err.message);
+    } finally {
+      setQuickAddLoading(false);
+    }
+  };
 
   const fetchProducts = async () => {
+    console.log("Fetching products, current user:", auth.currentUser?.uid);
+    setLoading(true);
     try {
       const snapshot = await getDocs(collection(db, 'products'));
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -37,6 +69,16 @@ export function AdminProducts() {
     }
   };
 
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleAdd = () => {
+    setEditingProduct(null);
+    setIsFormOpen(true);
+  };
+
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -44,18 +86,31 @@ export function AdminProducts() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Rechercher un produit..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all"
-          />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto flex-1">
+          <div className="relative flex-1 sm:max-w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Rechercher un produit..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all"
+            />
+          </div>
+          <button
+            onClick={handleQuickAdd}
+            disabled={quickAddLoading}
+            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors justify-center disabled:opacity-50"
+          >
+            {quickAddLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+            Test Ajout Rapide
+          </button>
         </div>
-        <button className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors">
+        <button 
+          onClick={handleAdd}
+          className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors w-full sm:w-auto justify-center"
+        >
           <Plus className="w-5 h-5" />
           Ajouter un produit
         </button>
@@ -66,7 +121,7 @@ export function AdminProducts() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                <th className="p-4">Produit</th>
+                <th className="p-4 min-w-[200px]">Produit</th>
                 <th className="p-4">Catégorie</th>
                 <th className="p-4">Prix</th>
                 <th className="p-4">Stock</th>
@@ -76,11 +131,13 @@ export function AdminProducts() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">Chargement...</td>
+                  <td colSpan={5} className="p-12 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-gray-300" />
+                  </td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">Aucun produit trouvé.</td>
+                  <td colSpan={5} className="p-12 text-center text-gray-500">Aucun produit trouvé.</td>
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
@@ -92,10 +149,20 @@ export function AdminProducts() {
                   >
                     <td className="p-4 flex items-center gap-4">
                       <img src={product.imageUrl} alt={product.name} className="w-12 h-12 rounded-lg object-cover bg-gray-100" referrerPolicy="no-referrer" />
-                      <span className="font-medium text-gray-900">{product.name}</span>
+                      <div>
+                        <span className="font-medium text-gray-900 block">{product.name}</span>
+                        {product.promotionPercentage && product.promotionPercentage > 0 && (
+                          <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold uppercase">-{product.promotionPercentage}%</span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4 text-gray-600 capitalize">{product.category}</td>
-                    <td className="p-4 font-medium text-gray-900">{product.price.toFixed(2)} TND</td>
+                    <td className="p-4">
+                      <div className="font-medium text-gray-900">{product.price.toFixed(2)} TND</div>
+                      {product.promotionPercentage && product.promotionPercentage > 0 && (
+                        <div className="text-xs text-gray-400 line-through">{(product.price / (1 - product.promotionPercentage/100)).toFixed(2)} TND</div>
+                      )}
+                    </td>
                     <td className="p-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {product.stock > 0 ? `${product.stock} en stock` : 'Rupture'}
@@ -103,7 +170,10 @@ export function AdminProducts() {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <button 
+                          onClick={() => handleEdit(product)}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
                           <Edit className="w-5 h-5" />
                         </button>
                         <button 
@@ -121,6 +191,16 @@ export function AdminProducts() {
           </table>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isFormOpen && (
+          <ProductForm 
+            product={editingProduct} 
+            onClose={() => setIsFormOpen(false)} 
+            onSuccess={fetchProducts}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

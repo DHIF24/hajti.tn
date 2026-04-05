@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, updateDoc, doc, query, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { collection, getDocs, updateDoc, doc, query, orderBy, deleteDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 import { Order } from '../../types';
-import { Search, Eye, CheckCircle, Clock, XCircle, Truck } from 'lucide-react';
+import { Search, Eye, CheckCircle, Clock, XCircle, Truck, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function AdminOrders() {
@@ -11,6 +11,7 @@ export function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchOrders = async () => {
+    console.log("Fetching orders, current user:", auth.currentUser?.uid);
     try {
       const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
@@ -33,6 +34,17 @@ export function AdminOrders() {
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     } catch (error) {
       console.error("Error updating order status", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+      try {
+        await deleteDoc(doc(db, 'orders', id));
+        setOrders(orders.filter(o => o.id !== id));
+      } catch (error) {
+        console.error("Error deleting order", error);
+      }
     }
   };
 
@@ -125,6 +137,12 @@ export function AdminOrders() {
                         </select>
                         <button className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
                           <Eye className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(order.id)}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </td>

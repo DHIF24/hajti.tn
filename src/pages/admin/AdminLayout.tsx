@@ -1,33 +1,52 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, LogOut, Bell, Loader2 } from 'lucide-react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, auth } from '../../firebase';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 
 export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (!isLoggedIn) {
-      navigate('/admin/login');
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("AdminLayout Auth State Change:", user?.uid, user?.email);
+      const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
+      if (!user && isLoggedIn) {
+        // If localStorage says logged in but Firebase says no, we might need to redirect or wait
+        // For now, if no user and no localStorage, definitely redirect
+      }
+      if (!isLoggedIn) {
+        navigate('/admin/login');
+      }
+      setIsAuthReady(true);
+    });
+    return () => unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
+    if (!isAuthReady) return;
     // Listen for new orders
     const q = query(collection(db, 'orders'), where('status', '==', 'pending'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setNewOrdersCount(snapshot.docs.length);
+    }, (error) => {
+      console.error("Orders snapshot error:", error);
     });
     return () => unsubscribe();
-  }, []);
+  }, [isAuthReady]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAdminLoggedIn');
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem('isAdminLoggedIn');
+      navigate('/admin/login');
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
 
   const navItems = [
@@ -106,7 +125,13 @@ export function AdminLayout() {
 
         {/* Page Content */}
         <div className="p-8 flex-1">
-          <Outlet />
+          {!isAuthReady ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </div>
       </main>
     </div>

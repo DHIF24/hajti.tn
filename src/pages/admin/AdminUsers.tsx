@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 import { UserProfile } from '../../types';
-import { Search, User, Mail, Shield } from 'lucide-react';
+import { Search, User, Mail, Shield, Trash2, Edit } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function AdminUsers() {
@@ -11,6 +11,7 @@ export function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchUsers = async () => {
+    console.log("Fetching users, current user:", auth.currentUser?.uid);
     try {
       const snapshot = await getDocs(collection(db, 'users'));
       const data = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
@@ -25,6 +26,26 @@ export function AdminUsers() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      try {
+        await deleteDoc(doc(db, 'users', id));
+        setUsers(users.filter(u => u.uid !== id));
+      } catch (error) {
+        console.error("Error deleting user", error);
+      }
+    }
+  };
+
+  const handleRoleChange = async (uid: string, newRole: UserProfile['role']) => {
+    try {
+      await updateDoc(doc(db, 'users', uid), { role: newRole });
+      setUsers(users.map(u => u.uid === uid ? { ...u, role: newRole } : u));
+    } catch (error) {
+      console.error("Error updating user role", error);
+    }
+  };
 
   const filteredUsers = users.filter(u => 
     (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
@@ -54,7 +75,7 @@ export function AdminUsers() {
                 <th className="p-4">Utilisateur</th>
                 <th className="p-4">Email</th>
                 <th className="p-4">Rôle</th>
-                <th className="p-4">ID</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -81,18 +102,29 @@ export function AdminUsers() {
                       <span className="font-medium text-gray-900">{user.name || 'Sans nom'}</span>
                     </td>
                     <td className="p-4 text-gray-600">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm">
                         <Mail className="w-4 h-4 text-gray-400" />
                         {user.email}
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className={`flex items-center gap-1 w-fit px-3 py-1 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
-                        {user.role === 'admin' && <Shield className="w-3 h-3" />}
-                        {user.role === 'admin' ? 'Administrateur' : 'Client'}
-                      </span>
+                      <select 
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.uid, e.target.value as UserProfile['role'])}
+                        className={`px-3 py-1 rounded-full text-xs font-medium outline-none border-none cursor-pointer ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}
+                      >
+                        <option value="customer">Client</option>
+                        <option value="admin">Administrateur</option>
+                      </select>
                     </td>
-                    <td className="p-4 font-mono text-xs text-gray-400">{user.uid}</td>
+                    <td className="p-4 text-right">
+                      <button 
+                        onClick={() => handleDelete(user.uid)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
                   </motion.tr>
                 ))
               )}

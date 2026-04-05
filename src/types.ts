@@ -8,6 +8,7 @@ export interface Product {
   stock: number;
   rating: number;
   featured?: boolean;
+  promotionPercentage?: number;
 }
 
 export interface Category {

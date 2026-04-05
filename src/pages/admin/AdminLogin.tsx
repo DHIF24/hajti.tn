@@ -1,21 +1,65 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Lock, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { auth, db } from '../../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 export function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     if (username === 'admin26' && password === 'admin26') {
-      localStorage.setItem('isAdminLoggedIn', 'true');
-      navigate('/admin');
+      try {
+        const adminEmail = 'admin26@hajti.com';
+        const adminPass = 'admin26admin26';
+        
+        let userCredential;
+        try {
+          userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPass);
+        } catch (authErr: any) {
+          if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
+            // Create admin user if it doesn't exist
+            userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPass);
+          } else {
+            throw authErr;
+          }
+        }
+
+        const user = userCredential.user;
+        console.log("Admin logged in successfully:", user.uid, user.email);
+        
+        // Ensure user document exists with admin role
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, 'users', user.uid), {
+            uid: user.uid,
+            email: adminEmail,
+            role: 'admin',
+            name: 'Admin'
+          });
+        }
+
+        localStorage.setItem('isAdminLoggedIn', 'true');
+        navigate('/admin');
+      } catch (err: any) {
+        console.error("Admin login error", err);
+        setError('Erreur de connexion au serveur: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
     } else {
       setError('Identifiants incorrects');
+      setLoading(false);
     }
   };
 
@@ -64,9 +108,17 @@ export function AdminLogin() {
           </div>
           <button
             type="submit"
-            className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors"
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            Se connecter
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Connexion...
+              </>
+            ) : (
+              'Se connecter'
+            )}
           </button>
         </form>
       </motion.div>

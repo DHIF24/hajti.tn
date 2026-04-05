@@ -14,6 +14,9 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
     addToCart(product, 1);
   };
 
+  const hasPromotion = product.promotionPercentage && product.promotionPercentage > 0;
+  const originalPrice = hasPromotion ? product.price / (1 - product.promotionPercentage! / 100) : product.price;
+
   if (listView) {
     return (
       <motion.div 
@@ -30,7 +33,12 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
               className="object-cover w-full h-full mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
               referrerPolicy="no-referrer"
             />
-            {badge && (
+            {hasPromotion && (
+              <div className="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-[0.15em] z-10">
+                -{product.promotionPercentage}%
+              </div>
+            )}
+            {!hasPromotion && badge && (
               <div className={`absolute top-4 right-4 text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-[0.15em] z-10 ${badge.color}`}>
                 {badge.text}
               </div>
@@ -49,9 +57,16 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
             <p className="text-sm text-gray-500 mb-6 font-light leading-relaxed max-w-2xl">
               {product.description}
             </p>
-            <span className="text-sm text-gray-900 font-medium tracking-wider">
-              {product.price.toFixed(2)} TND
-            </span>
+            <div className="flex items-center justify-center sm:justify-start gap-3">
+              <span className="text-sm text-gray-900 font-medium tracking-wider">
+                {product.price.toFixed(2)} TND
+              </span>
+              {hasPromotion && (
+                <span className="text-xs text-gray-400 line-through">
+                  {originalPrice.toFixed(2)} TND
+                </span>
+              )}
+            </div>
             {product.stock > 0 && (
               <button 
                 onClick={handleQuickAdd}
@@ -83,7 +98,12 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
             referrerPolicy="no-referrer"
           />
           
-          {badge && (
+          {hasPromotion && (
+            <div className="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-[0.15em] z-10">
+              -{product.promotionPercentage}%
+            </div>
+          )}
+          {!hasPromotion && badge && (
             <div className={`absolute top-4 right-4 text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-[0.15em] z-10 ${badge.color}`}>
               {badge.text}
             </div>
@@ -113,9 +133,16 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
           <h3 className="text-[13px] text-gray-800 uppercase tracking-[0.1em] mb-2 font-medium">
             {product.name}
           </h3>
-          <span className="text-[13px] text-gray-500 font-medium">
-            {product.price.toFixed(2)} TND
-          </span>
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-[13px] text-gray-900 font-medium">
+              {product.price.toFixed(2)} TND
+            </span>
+            {hasPromotion && (
+              <span className="text-[11px] text-gray-400 line-through">
+                {originalPrice.toFixed(2)} TND
+              </span>
+            )}
+          </div>
         </div>
       </Link>
     </motion.div>

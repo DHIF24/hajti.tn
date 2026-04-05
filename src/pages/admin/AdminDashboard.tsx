@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { collection, getDocs, query, where, doc, setDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 import { Package, ShoppingCart, Users, DollarSign } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -15,6 +15,7 @@ export function AdminDashboard() {
 
   useEffect(() => {
     const fetchStats = async () => {
+      console.log("Fetching stats, current user:", auth.currentUser?.uid);
       try {
         const productsSnap = await getDocs(collection(db, 'products'));
         const ordersSnap = await getDocs(collection(db, 'orders'));
@@ -43,6 +44,28 @@ export function AdminDashboard() {
 
     fetchStats();
   }, []);
+
+  const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [testError, setTestError] = useState('');
+
+  const testFirestore = async () => {
+    setTestStatus('testing');
+    setTestError('');
+    try {
+      const testDoc = doc(collection(db, 'test_connection'));
+      await setDoc(testDoc, {
+        timestamp: new Date().toISOString(),
+        user: auth.currentUser?.email || 'anonymous',
+        status: 'success'
+      });
+      setTestStatus('success');
+      console.log("Firestore test write successful!");
+    } catch (err: any) {
+      console.error("Firestore test write failed:", err);
+      setTestStatus('error');
+      setTestError(err.message || "Unknown error");
+    }
+  };
 
   const statCards = [
     { title: 'Revenus Totaux', value: `${stats.revenue.toFixed(2)} TND`, icon: DollarSign, color: 'bg-green-50 text-green-600' },
@@ -78,7 +101,24 @@ export function AdminDashboard() {
       </div>
 
       <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Bienvenue sur votre tableau de bord</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900">Bienvenue sur votre tableau de bord</h3>
+          <button 
+            onClick={testFirestore}
+            disabled={testStatus === 'testing'}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              testStatus === 'success' ? 'bg-green-100 text-green-700' :
+              testStatus === 'error' ? 'bg-red-100 text-red-700' :
+              'bg-black text-white hover:bg-gray-800'
+            }`}
+          >
+            {testStatus === 'testing' ? 'Test en cours...' : 
+             testStatus === 'success' ? 'Test Réussi !' : 
+             testStatus === 'error' ? 'Test Échoué' : 
+             'Tester la connexion Firestore'}
+          </button>
+        </div>
+        {testError && <p className="text-red-500 text-sm mb-4">Erreur: {testError}</p>}
         <p className="text-gray-600">
           Utilisez le menu de gauche pour gérer vos produits, suivre vos commandes et administrer vos utilisateurs.
           Les nouvelles commandes apparaîtront sous forme de notification dans la barre supérieure.
