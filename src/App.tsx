@@ -24,7 +24,25 @@ import { AdminUsers } from './pages/admin/AdminUsers';
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTo(0, 0);
+      document.body.scrollTo(0, 0);
+    };
+
+    // Try immediate
+    scrollToTop();
+    
+    // Try after a frame
+    const frameId = requestAnimationFrame(scrollToTop);
+    
+    // Try after a small timeout as a fallback
+    const timerId = setTimeout(scrollToTop, 10);
+    
+    return () => {
+      cancelAnimationFrame(frameId);
+      clearTimeout(timerId);
+    };
   }, [pathname]);
   return null;
 }
