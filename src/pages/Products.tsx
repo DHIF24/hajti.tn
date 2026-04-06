@@ -62,115 +62,21 @@ export function Products() {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      {!categoryFilter && (
-        <div className="relative h-[80vh] min-h-[600px] w-full bg-white flex items-center justify-center overflow-hidden mb-16">
-          {/* Animated Background Elements */}
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <motion.div 
-              animate={{ 
-                scale: [1, 1.1, 1],
-                rotate: [0, 5, 0]
-              }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 opacity-20"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=2000" 
-                alt="Background" 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-10" />
-          </div>
-
-          <div className="relative z-20 text-center px-4 max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-12"
-            >
-              <h1 
-                className="text-7xl md:text-9xl font-black text-gray-900 mb-4 leading-none tracking-tighter"
-                style={{ direction: 'rtl', fontFamily: "'Noto Sans Arabic', sans-serif" }}
-              >
-                <motion.span
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 1, type: "spring" }}
-                  className="block drop-shadow-2xl"
-                >
-                  اقضي حاجتك
-                </motion.span>
-                <motion.span
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8, duration: 1, type: "spring" }}
-                  className="block text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-200"
-                >
-                  و انت مطمان
-                </motion.span>
-              </h1>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.5, duration: 0.8 }}
-            >
-              <button 
-                onClick={() => {
-                  const promoSection = document.querySelector('.promotions-section');
-                  if (promoSection) {
-                    promoSection.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    document.getElementById('shop-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="group relative inline-flex items-center justify-center px-12 py-5 bg-black text-white text-sm uppercase tracking-[0.3em] font-black overflow-hidden transition-all hover:scale-105 active:scale-95"
-              >
-                <span className="relative z-10">Découvrir</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            </motion.div>
-          </div>
-
-          {/* Floating Decorative Elements */}
-          <motion.div 
-            animate={{ y: [0, -20, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 left-10 w-32 h-32 bg-gray-50 rounded-full blur-3xl -z-10"
-          />
-          <motion.div 
-            animate={{ y: [0, 20, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-1/4 right-10 w-48 h-48 bg-gray-100 rounded-full blur-3xl -z-10"
-          />
-        </div>
-      )}
 
       {/* Promotions Section */}
       {!categoryFilter && products.some(p => p.promotionPercentage && p.promotionPercentage > 0) && (
-        <div className="w-full bg-gray-50 py-24 mb-24 promotions-section">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-12">
+        <div className="w-full bg-gray-50 pb-24 mb-24 promotions-section">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0">
+            <div className="flex justify-center mb-12">
               <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
+                className="text-center"
               >
-                <span className="text-[11px] tracking-[0.3em] uppercase text-red-600 font-black mb-2 block">Offres Spéciales</span>
                 <h2 className="text-4xl font-serif tracking-tight text-gray-900">Les Meilleures Promotions</h2>
               </motion.div>
-              <Link 
-                to="/products?category=offres"
-                className="text-[11px] uppercase tracking-[0.15em] font-bold border-b-2 border-black pb-1 hover:text-gray-500 hover:border-gray-300 transition-all"
-              >
-                Voir toutes les offres
-              </Link>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">

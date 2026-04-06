@@ -57,7 +57,6 @@ export function Navbar() {
           <div className="hidden lg:flex items-center space-x-6 text-[15px] tracking-wide text-gray-600 font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             <Link to="/products?category=art" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Art de table</Link>
             <Link to="/products?category=rangement" className="px-2 py-1 hover:text-black hover:bg-gray-50 rounded-md transition-colors">Rangement</Link>
-            <Link to="/products?category=offres" className="px-2 py-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">Offres</Link>
             
             <div className="flex items-center space-x-5 ml-6 border-l border-gray-200 pl-6">
               <Link to="/auth" className="text-gray-600 hover:text-black transition-colors">
@@ -120,7 +119,6 @@ export function Navbar() {
             <Link to="/products?category=cuisine" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Cuisine</Link>
             <Link to="/products?category=art" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Art de table</Link>
             <Link to="/products?category=rangement" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Rangement</Link>
-            <Link to="/products?category=offres" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors px-4 py-3 rounded-lg">Offres</Link>
           </div>
         </div>
       )}
