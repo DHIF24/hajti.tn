@@ -64,83 +64,127 @@ export function Products() {
     <div className="w-full">
       {/* Hero Section */}
       {!categoryFilter && (
-        <div className="relative h-[60vh] min-h-[500px] w-full bg-[#000] flex items-center justify-center overflow-hidden mb-16">
-          <div className="absolute inset-0 z-0">
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline
-              className="w-full h-full object-cover opacity-70"
-            >
-              <source src="/hero-video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative z-10 text-center px-4 max-w-3xl"
-          >
-            <span className="text-[11px] tracking-[0.3em] uppercase text-white/80 font-medium mb-4 block">Nouvelle Collection</span>
-            <h1 className="text-5xl md:text-7xl font-serif tracking-tight text-white mb-6 leading-tight">
-              L'Art de Vivre
-            </h1>
-            <p className="text-white/90 text-lg font-light mb-10 max-w-xl mx-auto">
-              Découvrez notre sélection exclusive de pièces uniques pour sublimer votre intérieur avec élégance et raffinement.
-            </p>
-            <button 
-              onClick={() => {
-                document.getElementById('shop-section')?.scrollIntoView({ behavior: 'smooth' });
+        <div className="relative h-[80vh] min-h-[600px] w-full bg-white flex items-center justify-center overflow-hidden mb-16">
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, 0]
               }}
-              className="inline-flex items-center gap-3 border-b border-white pb-2 text-sm uppercase tracking-[0.15em] font-medium text-white hover:text-white/70 hover:border-white/70 transition-colors"
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 opacity-20"
             >
-              Découvrir <ArrowRight className="w-4 h-4" />
-            </button>
-          </motion.div>
+              <img 
+                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=2000" 
+                alt="Background" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+            <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-10" />
+          </div>
+
+          <div className="relative z-20 text-center px-4 max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-12"
+            >
+              <h1 
+                className="text-7xl md:text-9xl font-black text-gray-900 mb-4 leading-none tracking-tighter"
+                style={{ direction: 'rtl', fontFamily: "'Noto Sans Arabic', sans-serif" }}
+              >
+                <motion.span
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4, duration: 1, type: "spring" }}
+                  className="block drop-shadow-2xl"
+                >
+                  اقضي حاجتك
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8, duration: 1, type: "spring" }}
+                  className="block text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-200"
+                >
+                  و انت مطمان
+                </motion.span>
+              </h1>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.5, duration: 0.8 }}
+            >
+              <button 
+                onClick={() => {
+                  const promoSection = document.querySelector('.promotions-section');
+                  if (promoSection) {
+                    promoSection.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    document.getElementById('shop-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="group relative inline-flex items-center justify-center px-12 py-5 bg-black text-white text-sm uppercase tracking-[0.3em] font-black overflow-hidden transition-all hover:scale-105 active:scale-95"
+              >
+                <span className="relative z-10">Découvrir</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            </motion.div>
+          </div>
+
+          {/* Floating Decorative Elements */}
+          <motion.div 
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/4 left-10 w-32 h-32 bg-gray-50 rounded-full blur-3xl -z-10"
+          />
+          <motion.div 
+            animate={{ y: [0, 20, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-1/4 right-10 w-48 h-48 bg-gray-100 rounded-full blur-3xl -z-10"
+          />
         </div>
       )}
 
-      {/* Promotions & New Arrivals Section */}
-      {!categoryFilter && products.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-          <div className="flex justify-between items-end mb-10">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <span className="text-[11px] tracking-[0.3em] uppercase text-gray-500 font-medium mb-2 block">Sélection</span>
-              <h2 className="text-2xl font-serif tracking-tight text-gray-900">Nouveautés & Promotions</h2>
-            </motion.div>
-            <motion.button 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              onClick={() => document.getElementById('shop-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="hidden sm:flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] font-medium text-gray-900 hover:text-gray-500 transition-colors"
-            >
-              Voir tout <ArrowRight className="w-4 h-4" />
-            </motion.button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-            {products.slice(0, 4).map((product, index) => {
-              const badge = index % 2 === 0 
-                ? { text: 'Nouveau', color: 'bg-black' }
-                : { text: '-20%', color: 'bg-red-600' };
-                
-              return (
-                <ProductCard 
-                  key={`promo-${product.id}`} 
-                  product={product} 
-                  badge={badge}
-                />
-              );
-            })}
+      {/* Promotions Section */}
+      {!categoryFilter && products.some(p => p.promotionPercentage && p.promotionPercentage > 0) && (
+        <div className="w-full bg-gray-50 py-24 mb-24 promotions-section">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-end mb-12">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <span className="text-[11px] tracking-[0.3em] uppercase text-red-600 font-black mb-2 block">Offres Spéciales</span>
+                <h2 className="text-4xl font-serif tracking-tight text-gray-900">Les Meilleures Promotions</h2>
+              </motion.div>
+              <Link 
+                to="/products?category=offres"
+                className="text-[11px] uppercase tracking-[0.15em] font-bold border-b-2 border-black pb-1 hover:text-gray-500 hover:border-gray-300 transition-all"
+              >
+                Voir toutes les offres
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+              {products
+                .filter(p => p.promotionPercentage && p.promotionPercentage > 0)
+                .slice(0, 4)
+                .map((product) => (
+                  <ProductCard 
+                    key={`promo-${product.id}`} 
+                    product={product} 
+                    badge={{ text: `-${product.promotionPercentage}%`, color: 'bg-red-600' }}
+                  />
+                ))}
+            </div>
           </div>
         </div>
       )}
