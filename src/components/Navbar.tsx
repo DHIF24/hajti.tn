@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, User as UserIcon, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { motion, useAnimation } from 'motion/react';
 
 export function Navbar() {
   const { user } = useAuth();
-  const { itemCount } = useCart();
+  const { itemCount, lastAdded } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const controls = useAnimation();
+
+  useEffect(() => {
+    if (lastAdded) {
+      controls.start({
+        scale: [1, 1.3, 1],
+        rotate: [0, -10, 10, 0],
+        transition: { duration: 0.4, ease: "easeInOut" }
+      });
+    }
+  }, [lastAdded, controls]);
 
   return (
     <nav className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition-all duration-300">
@@ -55,11 +67,18 @@ export function Navbar() {
                 <Search className="w-5 h-5" strokeWidth={1.5} />
               </button>
               <Link to="/cart" className="relative text-gray-600 hover:text-black transition-colors">
-                <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                <motion.div animate={controls}>
+                  <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                </motion.div>
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <motion.span 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    key={itemCount}
+                    className="absolute -top-1 -right-2 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                  >
                     {itemCount}
-                  </span>
+                  </motion.span>
                 )}
               </Link>
             </div>
@@ -72,11 +91,18 @@ export function Navbar() {
             </Link>
             <Search className="w-5 h-5 text-gray-600" strokeWidth={1.5} />
             <Link to="/cart" className="relative text-gray-600 hover:text-black transition-colors">
-              <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+              <motion.div animate={controls}>
+                <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+              </motion.div>
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  key={itemCount}
+                  className="absolute -top-1 -right-2 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                >
                   {itemCount}
-                </span>
+                </motion.span>
               )}
             </Link>
           </div>

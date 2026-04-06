@@ -4,14 +4,22 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
-import { ChevronRight, Minus, Plus } from 'lucide-react';
+import { ChevronRight, Minus, Plus, Check } from 'lucide-react';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [isAdded, setIsAdded] = useState(false);
   const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product, quantity);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -120,13 +128,18 @@ export function ProductDetail() {
               </div>
               
               <button 
-                onClick={() => {
-                  for(let i=0; i<quantity; i++) addToCart(product);
-                }}
+                onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 bg-black text-white px-8 py-3.5 text-[11px] uppercase tracking-[0.15em] font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`flex-1 px-8 py-3.5 text-[11px] uppercase tracking-[0.15em] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${isAdded ? 'bg-green-600 text-white' : 'bg-black text-white hover:bg-gray-800'}`}
               >
-                {product.stock === 0 ? 'Épuisé' : 'Ajouter au panier'}
+                {isAdded ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Ajouté !
+                  </>
+                ) : (
+                  product.stock === 0 ? 'Épuisé' : 'Ajouter au panier'
+                )}
               </button>
             </div>
             

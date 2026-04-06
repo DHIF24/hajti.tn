@@ -56,7 +56,7 @@ export function Products() {
   }, [products, categoryFilter, inStockOnly, sortBy]);
 
   const getGridClass = () => {
-    if (viewMode === 'grid-3') return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16';
+    if (viewMode === 'grid-3') return 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12';
     return 'flex flex-col gap-y-12';
   };
 
@@ -104,7 +104,7 @@ export function Products() {
 
       {/* Promotions & New Arrivals Section */}
       {!categoryFilter && products.length > 0 && (
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 mb-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
           <div className="flex justify-between items-end mb-10">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -113,7 +113,7 @@ export function Products() {
               transition={{ duration: 0.6 }}
             >
               <span className="text-[11px] tracking-[0.3em] uppercase text-gray-500 font-medium mb-2 block">Sélection</span>
-              <h2 className="text-3xl font-serif tracking-tight text-gray-900">Nouveautés & Promotions</h2>
+              <h2 className="text-2xl font-serif tracking-tight text-gray-900">Nouveautés & Promotions</h2>
             </motion.div>
             <motion.button 
               initial={{ opacity: 0, x: 20 }}
@@ -127,7 +127,7 @@ export function Products() {
             </motion.button>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
             {products.slice(0, 4).map((product, index) => {
               const badge = index % 2 === 0 
                 ? { text: 'Nouveau', color: 'bg-black' }
@@ -145,7 +145,7 @@ export function Products() {
         </div>
       )}
 
-      <div id="shop-section" className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div id="shop-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumbs */}
         <div className="text-[11px] tracking-[0.15em] text-gray-400 mb-12 uppercase font-medium">
           <Link to="/" className="hover:text-gray-900 transition-colors">Accueil</Link>

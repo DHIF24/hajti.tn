@@ -13,6 +13,7 @@ export function AdminProducts() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [quickAddLoading, setQuickAddLoading] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const handleQuickAdd = async () => {
     setQuickAddLoading(true);
@@ -59,13 +60,13 @@ export function AdminProducts() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      try {
-        await deleteDoc(doc(db, 'products', id));
-        setProducts(products.filter(p => p.id !== id));
-      } catch (error) {
-        console.error("Error deleting product", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      setProducts(products.filter(p => p.id !== id));
+      setProductToDelete(null);
+    } catch (error) {
+      console.error("Error deleting product", error);
+      alert("Erreur lors de la suppression du produit.");
     }
   };
 
@@ -177,7 +178,7 @@ export function AdminProducts() {
                           <Edit className="w-5 h-5" />
                         </button>
                         <button 
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => setProductToDelete(product.id)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-5 h-5" />
@@ -199,6 +200,37 @@ export function AdminProducts() {
             onClose={() => setIsFormOpen(false)} 
             onSuccess={fetchProducts}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Custom Delete Confirmation Modal */}
+      <AnimatePresence>
+        {productToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Confirmer la suppression</h3>
+              <p className="text-gray-600 mb-8">Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.</p>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setProductToDelete(null)}
+                  className="flex-1 px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  onClick={() => handleDelete(productToDelete)}
+                  className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
 import { motion } from 'motion/react';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge?: { text: string; color: string } }> = ({ product, listView, badge }) => {
   const { addToCart } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   const hasPromotion = product.promotionPercentage && product.promotionPercentage > 0;
@@ -26,7 +29,7 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
         transition={{ duration: 0.5 }}
       >
         <Link to={`/product/${product.id}`} className="group flex flex-col sm:flex-row gap-8 items-center border-b border-gray-100 pb-8">
-          <div className="relative w-full sm:w-1/3 aspect-[4/5] overflow-hidden bg-[#f8f8f8] flex-shrink-0">
+          <div className="relative w-full sm:w-1/3 aspect-square overflow-hidden bg-[#f8f8f8] flex-shrink-0">
             <img 
               src={product.imageUrl} 
               alt={product.name}
@@ -70,10 +73,19 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
             {product.stock > 0 && (
               <button 
                 onClick={handleQuickAdd}
-                className="mt-6 flex items-center justify-center sm:justify-start gap-2 text-[11px] uppercase tracking-[0.15em] font-medium text-gray-500 hover:text-black transition-colors"
+                className={`mt-6 flex items-center justify-center sm:justify-start gap-2 text-[11px] uppercase tracking-[0.15em] font-medium transition-colors ${isAdded ? 'text-green-600' : 'text-gray-500 hover:text-black'}`}
               >
-                <ShoppingBag className="w-4 h-4" />
-                Ajouter au panier
+                {isAdded ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Ajouté !
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4" />
+                    Ajouter au panier
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -90,7 +102,7 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
       transition={{ duration: 0.5 }}
     >
       <Link to={`/product/${product.id}`} className="group relative flex flex-col">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#f8f8f8] mb-6">
+        <div className="relative aspect-square overflow-hidden bg-[#f8f8f8] mb-6">
           <img 
             src={product.imageUrl} 
             alt={product.name}
@@ -114,10 +126,19 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
             <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 ease-out">
               <button 
                 onClick={handleQuickAdd}
-                className="w-full bg-white/90 backdrop-blur-sm text-black py-3 text-[11px] uppercase tracking-[0.15em] font-medium hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2"
+                className={`w-full backdrop-blur-sm py-3 text-[11px] uppercase tracking-[0.15em] font-medium transition-colors flex items-center justify-center gap-2 ${isAdded ? 'bg-green-600 text-white' : 'bg-white/90 text-black hover:bg-black hover:text-white'}`}
               >
-                <ShoppingBag className="w-4 h-4" />
-                Ajouter
+                {isAdded ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Ajouté !
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4" />
+                    Ajouter
+                  </>
+                )}
               </button>
             </div>
           )}

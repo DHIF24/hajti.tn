@@ -9,6 +9,7 @@ interface CartContextType {
   clearCart: () => void;
   total: number;
   itemCount: number;
+  lastAdded: string | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -18,12 +19,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('aura_cart');
     return saved ? JSON.parse(saved) : [];
   });
+  const [lastAdded, setLastAdded] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('aura_cart', JSON.stringify(items));
   }, [items]);
 
   const addToCart = (product: Product, quantity = 1) => {
+    setLastAdded(null); // Reset
+    setTimeout(() => setLastAdded(product.id), 10); // Trigger animation
+    
     setItems(current => {
       const existing = current.find(item => item.id === product.id);
       if (existing) {
@@ -56,7 +61,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, total, itemCount }}>
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, total, itemCount, lastAdded }}>
       {children}
     </CartContext.Provider>
   );

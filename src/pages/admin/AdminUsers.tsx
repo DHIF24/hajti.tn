@@ -3,12 +3,13 @@ import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firesto
 import { db, auth } from '../../firebase';
 import { UserProfile } from '../../types';
 import { Search, User, Mail, Shield, Trash2, Edit } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export function AdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     console.log("Fetching users, current user:", auth.currentUser?.uid);
@@ -28,13 +29,12 @@ export function AdminUsers() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      try {
-        await deleteDoc(doc(db, 'users', id));
-        setUsers(users.filter(u => u.uid !== id));
-      } catch (error) {
-        console.error("Error deleting user", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'users', id));
+      setUsers(users.filter(u => u.uid !== id));
+      setUserToDelete(null);
+    } catch (error) {
+      console.error("Error deleting user", error);
     }
   };
 
@@ -119,7 +119,7 @@ export function AdminUsers() {
                     </td>
                     <td className="p-4 text-right">
                       <button 
-                        onClick={() => handleDelete(user.uid)}
+                        onClick={() => setUserToDelete(user.uid)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -132,6 +132,37 @@ export function AdminUsers() {
           </table>
         </div>
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      <AnimatePresence>
+        {userToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Confirmer la suppression</h3>
+              <p className="text-gray-600 mb-8">Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setUserToDelete(null)}
+                  className="flex-1 px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  onClick={() => handleDelete(userToDelete)}
+                  className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

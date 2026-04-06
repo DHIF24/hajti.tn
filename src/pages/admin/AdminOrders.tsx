@@ -3,12 +3,13 @@ import { collection, getDocs, updateDoc, doc, query, orderBy, deleteDoc } from '
 import { db, auth } from '../../firebase';
 import { Order } from '../../types';
 import { Search, Eye, CheckCircle, Clock, XCircle, Truck, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     console.log("Fetching orders, current user:", auth.currentUser?.uid);
@@ -38,13 +39,12 @@ export function AdminOrders() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
-      try {
-        await deleteDoc(doc(db, 'orders', id));
-        setOrders(orders.filter(o => o.id !== id));
-      } catch (error) {
-        console.error("Error deleting order", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'orders', id));
+      setOrders(orders.filter(o => o.id !== id));
+      setOrderToDelete(null);
+    } catch (error) {
+      console.error("Error deleting order", error);
     }
   };
 
@@ -139,7 +139,7 @@ export function AdminOrders() {
                           <Eye className="w-5 h-5" />
                         </button>
                         <button 
-                          onClick={() => handleDelete(order.id)}
+                          onClick={() => setOrderToDelete(order.id)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-5 h-5" />
@@ -153,6 +153,37 @@ export function AdminOrders() {
           </table>
         </div>
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      <AnimatePresence>
+        {orderToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Confirmer la suppression</h3>
+              <p className="text-gray-600 mb-8">Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.</p>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setOrderToDelete(null)}
+                  className="flex-1 px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  onClick={() => handleDelete(orderToDelete)}
+                  className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
