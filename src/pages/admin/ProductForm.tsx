@@ -19,6 +19,8 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
     price: 0,
     category: 'decors',
     imageUrl: '',
+    images: [],
+    videoUrl: '',
     stock: 0,
     rating: 5,
     featured: false,
@@ -26,6 +28,8 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
+  const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,12 +41,15 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
         price: product.price,
         category: product.category,
         imageUrl: product.imageUrl,
+        images: product.images || [],
+        videoUrl: product.videoUrl || '',
         stock: product.stock,
         rating: product.rating,
         featured: product.featured || false,
         promotionPercentage: product.promotionPercentage || 0
       });
       setImagePreview(product.imageUrl);
+      setAdditionalImagePreviews(product.images || []);
     }
   }, [product]);
 
@@ -54,12 +61,26 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
     }
   };
 
+  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setAdditionalImageFiles(prev => [...prev, ...files]);
+      const newPreviews = files.map(file => URL.createObjectURL(file as Blob));
+      setAdditionalImagePreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setAdditionalImagePreviews(prev => prev.filter((_, i) => i !== index));
+    // Also remove from files if it was a newly added file
+    // This is a bit tricky because some previews might be existing URLs
+    // For simplicity, we'll just filter the previews and handle the files during submit
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    console.log("Starting product save process...");
-    console.log("Current user:", auth.currentUser?.uid, auth.currentUser?.email);
 
     if (!auth.currentUser) {
       setError("Vous devez être connecté pour effectuer cette action.");
@@ -70,33 +91,31 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
     try {
       let finalImageUrl = formData.imageUrl || 'https://picsum.photos/seed/product/800/800';
 
+      // Upload main image
       if (imageFile) {
-        console.log("Uploading image to storage...", imageFile.name);
         const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-        try {
-          // Increased timeout to 30 seconds for slow connections
-          const uploadPromise = uploadBytes(storageRef, imageFile);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("L'upload de l'image a expiré (timeout de 30s)")), 30000)
-          );
-          
-          const uploadResult = await Promise.race([uploadPromise, timeoutPromise]) as any;
-          finalImageUrl = await getDownloadURL(uploadResult.ref);
-          console.log("Image uploaded successfully:", finalImageUrl);
-        } catch (uploadErr: any) {
-          console.error("Image upload failed or timed out:", uploadErr);
-          // Fallback to placeholder if upload fails, but don't block the whole process
-          // Only show as a warning if we have a fallback
-          console.warn("Using fallback image due to upload failure");
-          if (!finalImageUrl || finalImageUrl.includes('picsum.photos')) {
-             finalImageUrl = 'https://picsum.photos/seed/' + Math.random() + '/800/800';
-          }
-        }
+        const uploadResult = await uploadBytes(storageRef, imageFile);
+        finalImageUrl = await getDownloadURL(uploadResult.ref);
+      }
+
+      // Upload additional images
+      const uploadedAdditionalImages: string[] = [];
+      // Keep existing URLs from previews
+      const existingUrls = additionalImagePreviews.filter(p => p.startsWith('http'));
+      uploadedAdditionalImages.push(...existingUrls);
+
+      // Upload new files
+      for (const file of additionalImageFiles) {
+        const storageRef = ref(storage, `products/gallery/${Date.now()}_${file.name}`);
+        const uploadResult = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(uploadResult.ref);
+        uploadedAdditionalImages.push(url);
       }
 
       const productData = {
         ...formData,
-        imageUrl: finalImageUrl || 'https://picsum.photos/seed/product/800/800',
+        imageUrl: finalImageUrl,
+        images: uploadedAdditionalImages,
         price: Number(formData.price),
         stock: Number(formData.stock),
         rating: Number(formData.rating),
@@ -104,25 +123,14 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
         updatedAt: new Date().toISOString()
       };
 
-      console.log("Saving product data to Firestore...", productData);
-      try {
-        const savePromise = product 
-          ? setDoc(doc(db, 'products', product.id), productData)
-          : addDoc(collection(db, 'products'), productData);
-          
-        const timeoutSavePromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("L'enregistrement dans la base de données a expiré (timeout de 30s)")), 30000)
-        );
-
-        await Promise.race([savePromise, timeoutSavePromise]);
-        console.log("Product saved successfully to Firestore");
-        
-        onSuccess();
-        onClose();
-      } catch (firestoreErr: any) {
-        console.error("Firestore save failed:", firestoreErr);
-        throw new Error("Échec de l'enregistrement dans la base de données: " + firestoreErr.message);
+      if (product) {
+        await setDoc(doc(db, 'products', product.id), productData);
+      } else {
+        await addDoc(collection(db, 'products'), productData);
       }
+      
+      onSuccess();
+      onClose();
     } catch (err: any) {
       console.error("Error in handleSubmit:", err);
       setError(err.message || "Une erreur inattendue est survenue.");
@@ -290,6 +298,51 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
                 />
                 <label htmlFor="featured" className="text-sm font-medium text-gray-700 cursor-pointer">Mettre en avant sur l'accueil</label>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">URL de la Vidéo (Optionnel)</label>
+                <input
+                  type="url"
+                  placeholder="https://example.com/video.mp4"
+                  value={formData.videoUrl}
+                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-4">Images Additionnelles (Galerie)</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+              {additionalImagePreviews.map((preview, index) => (
+                <div key={index} className="relative aspect-square rounded-xl overflow-hidden group">
+                  <img src={preview} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                  <button 
+                    type="button"
+                    onClick={() => removeAdditionalImage(index)}
+                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              <button 
+                type="button"
+                onClick={() => document.getElementById('additional-images-upload')?.click()}
+                className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center hover:border-black hover:bg-gray-50 transition-all"
+              >
+                <Upload className="w-6 h-6 text-gray-300" />
+                <span className="text-[10px] text-gray-400 mt-1">Ajouter</span>
+              </button>
+              <input 
+                id="additional-images-upload"
+                type="file" 
+                multiple
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleAdditionalImagesChange}
+              />
             </div>
           </div>
 

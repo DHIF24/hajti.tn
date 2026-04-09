@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
-import { ChevronRight, Minus, Plus, Check } from 'lucide-react';
+import { ChevronRight, Minus, Plus, Check, Play, Maximize2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +13,9 @@ export function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [activeImage, setActiveImage] = useState<string>('');
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
@@ -28,7 +32,9 @@ export function ProductDetail() {
         const docRef = doc(db, 'products', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
+          const data = { id: docSnap.id, ...docSnap.data() } as Product;
+          setProduct(data);
+          setActiveImage(data.imageUrl);
         }
       } catch (error) {
         console.error("Error fetching product", error);
@@ -39,16 +45,23 @@ export function ProductDetail() {
     fetchProduct();
   }, [id]);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.pageX - left) / width) * 100;
+    const y = ((e.pageY - top) / height) * 100;
+    setMousePos({ x, y });
+  };
+
   if (loading) {
     return (
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="aspect-[4/5] bg-gray-100"></div>
+          <div className="aspect-square bg-gray-100 rounded-3xl"></div>
           <div className="space-y-6 py-8">
             <div className="h-4 bg-gray-100 w-1/4"></div>
             <div className="h-10 bg-gray-100 w-3/4"></div>
             <div className="h-6 bg-gray-100 w-1/4"></div>
-            <div className="h-32 bg-gray-100"></div>
+            <div className="h-32 bg-gray-100 rounded-2xl"></div>
           </div>
         </div>
       </div>
@@ -57,84 +70,161 @@ export function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="max-w-[1200px] mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl mb-4 font-light">Produit introuvable</h2>
-        <Link to="/products" className="text-[11px] uppercase tracking-[0.15em] border-b border-black pb-1 hover:text-gray-600 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 py-24 text-center">
+        <h2 className="text-2xl mb-4 font-display font-bold">Produit introuvable</h2>
+        <Link to="/products" className="text-[12px] uppercase tracking-[0.2em] font-bold text-brand-accent border-b-2 border-brand-accent pb-1 hover:text-brand-ink hover:border-brand-ink transition-all">
           Retour à la boutique
         </Link>
       </div>
     );
   }
 
+  const allImages = [product.imageUrl, ...(product.images || [])];
+
   return (
-    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Breadcrumbs */}
-      <div className="flex items-center text-[11px] tracking-[0.15em] text-gray-400 mb-12 uppercase font-medium">
-        <Link to="/" className="hover:text-gray-900 transition-colors">Accueil</Link>
+      <div className="flex items-center text-[10px] tracking-[0.2em] text-brand-ink/40 mb-12 uppercase font-bold">
+        <Link to="/" className="hover:text-brand-accent transition-colors">Accueil</Link>
         <ChevronRight className="w-3 h-3 mx-2" />
-        <Link to="/products" className="hover:text-gray-900 transition-colors">Shop</Link>
+        <Link to="/products" className="hover:text-brand-accent transition-colors">Boutique</Link>
         <ChevronRight className="w-3 h-3 mx-2" />
-        <span className="text-gray-900">{product.name}</span>
+        <span className="text-brand-ink">{product.name}</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
-        {/* Product Image */}
-        <div className="bg-[#f8f8f8] aspect-[4/5] relative">
-          <img 
-            src={product.imageUrl} 
-            alt={product.name}
-            className="w-full h-full object-cover mix-blend-multiply"
-            referrerPolicy="no-referrer"
-          />
-          {product.stock === 0 && (
-            <div className="absolute top-6 left-6 bg-[#f0f0f0] text-gray-600 text-[11px] font-medium px-4 py-2 uppercase tracking-[0.15em]">
-              En Rupture
-            </div>
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+        {/* Image Gallery */}
+        <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-6">
+          {/* Thumbnails */}
+          <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar">
+            {allImages.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImage(img)}
+                className={`relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 ${activeImage === img ? 'border-brand-accent scale-95 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              >
+                <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-cover" />
+              </button>
+            ))}
+            {product.videoUrl && (
+              <button
+                onClick={() => setActiveImage('video')}
+                className={`relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 flex items-center justify-center bg-brand-ink ${activeImage === 'video' ? 'border-brand-accent scale-95 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              >
+                <Play className="w-8 h-8 text-white" />
+              </button>
+            )}
+          </div>
+
+          {/* Main View */}
+          <div className="flex-grow relative aspect-square bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-brand-ink/5">
+            <AnimatePresence mode="wait">
+              {activeImage === 'video' ? (
+                <motion.div
+                  key="video"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="w-full h-full"
+                >
+                  <video 
+                    src={product.videoUrl} 
+                    controls 
+                    autoPlay 
+                    className="w-full h-full object-cover"
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={activeImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="w-full h-full cursor-zoom-in relative"
+                  onMouseEnter={() => setIsZoomed(true)}
+                  onMouseLeave={() => setIsZoomed(false)}
+                  onMouseMove={handleMouseMove}
+                >
+                  <img 
+                    src={activeImage} 
+                    alt={product.name}
+                    className={`w-full h-full object-cover transition-transform duration-200 ${isZoomed ? 'scale-150' : 'scale-100'}`}
+                    style={isZoomed ? {
+                      transformOrigin: `${mousePos.x}% ${mousePos.y}%`
+                    } : {}}
+                    referrerPolicy="no-referrer"
+                  />
+                  {!isZoomed && (
+                    <div className="absolute bottom-6 right-6 p-3 bg-white/80 backdrop-blur-md rounded-full text-brand-ink shadow-lg pointer-events-none">
+                      <Maximize2 className="w-5 h-5" />
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {product.stock === 0 && (
+              <div className="absolute top-8 left-8 bg-brand-bg/90 backdrop-blur-md text-brand-ink text-[12px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest shadow-xl">
+                En Rupture
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Product Info */}
-        <div className="flex flex-col justify-center">
-          <h1 className="text-3xl lg:text-4xl font-light text-gray-900 mb-4 tracking-wide">
-            {product.name}
-          </h1>
-          
-          <div className="text-xl text-gray-600 mb-8 font-medium">
-            {product.price.toFixed(2)} TND
+        <div className="lg:col-span-5 flex flex-col justify-center py-4">
+          <div className="mb-8">
+            <span className="text-brand-accent text-[12px] uppercase tracking-[0.3em] font-bold mb-4 block">
+              {product.category}
+            </span>
+            <h1 className="text-4xl lg:text-5xl font-display font-bold text-brand-ink mb-6 leading-tight">
+              {product.name}
+            </h1>
+            
+            <div className="flex items-center gap-6 mb-8">
+              <div className="text-3xl text-brand-ink font-bold">
+                {product.price.toFixed(2)} TND
+              </div>
+              {product.promotionPercentage && (
+                <div className="bg-brand-accent text-white text-[12px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                  -{product.promotionPercentage}%
+                </div>
+              )}
+            </div>
+
+            <p className="text-brand-ink/60 text-lg font-light leading-relaxed mb-10">
+              {product.description}
+            </p>
           </div>
 
-          <div className="prose prose-sm text-gray-500 mb-12 leading-relaxed">
-            <p>{product.description}</p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border border-gray-200">
+          <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="flex items-center bg-white border border-brand-ink/10 rounded-2xl p-1 shadow-sm">
                 <button 
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-4 py-3 text-gray-500 hover:text-black transition-colors"
+                  className="w-12 h-12 flex items-center justify-center text-brand-ink/40 hover:text-brand-accent transition-colors"
                   disabled={product.stock === 0}
                 >
-                  <Minus className="w-4 h-4" strokeWidth={1.5} />
+                  <Minus className="w-5 h-5" />
                 </button>
-                <span className="w-12 text-center text-sm font-medium">{quantity}</span>
+                <span className="w-12 text-center text-lg font-bold">{quantity}</span>
                 <button 
                   onClick={() => setQuantity(quantity + 1)}
-                  className="px-4 py-3 text-gray-500 hover:text-black transition-colors"
+                  className="w-12 h-12 flex items-center justify-center text-brand-ink/40 hover:text-brand-accent transition-colors"
                   disabled={product.stock === 0}
                 >
-                  <Plus className="w-4 h-4" strokeWidth={1.5} />
+                  <Plus className="w-5 h-5" />
                 </button>
               </div>
               
               <button 
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className={`flex-1 px-8 py-3.5 text-[11px] uppercase tracking-[0.15em] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${isAdded ? 'bg-green-600 text-white' : 'bg-black text-white hover:bg-gray-800'}`}
+                className={`flex-1 w-full sm:w-auto px-12 py-5 rounded-2xl text-[12px] uppercase tracking-[0.2em] font-bold transition-all duration-300 shadow-xl flex items-center justify-center gap-3 ${isAdded ? 'bg-green-600 text-white' : 'bg-brand-ink text-white hover:bg-brand-accent'}`}
               >
                 {isAdded ? (
                   <>
-                    <Check className="w-4 h-4" />
+                    <Check className="w-5 h-5" strokeWidth={3} />
                     Ajouté !
                   </>
                 ) : (
@@ -143,14 +233,22 @@ export function ProductDetail() {
               </button>
             </div>
             
-            <button className="w-full border border-black text-black px-8 py-3.5 text-[11px] uppercase tracking-[0.15em] font-medium hover:bg-gray-50 transition-colors">
+            <button className="w-full bg-white border-2 border-brand-ink text-brand-ink px-12 py-5 rounded-2xl text-[12px] uppercase tracking-[0.2em] font-bold hover:bg-brand-ink hover:text-white transition-all duration-300 shadow-sm">
               Acheter maintenant
             </button>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-100 text-[11px] uppercase tracking-[0.1em] text-gray-500 space-y-3">
-            <p><span className="text-gray-900 font-medium mr-2">Catégorie:</span> {product.category}</p>
-            <p><span className="text-gray-900 font-medium mr-2">Disponibilité:</span> {product.stock > 0 ? `${product.stock} en stock` : 'Rupture de stock'}</p>
+          <div className="mt-16 pt-10 border-t border-brand-ink/5 space-y-4">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.1em]">
+              <span className="text-brand-ink/40 font-bold">Disponibilité</span>
+              <span className={`font-bold ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {product.stock > 0 ? `${product.stock} en stock` : 'Rupture de stock'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.1em]">
+              <span className="text-brand-ink/40 font-bold">Livraison</span>
+              <span className="text-brand-ink font-bold">2-4 jours ouvrables</span>
+            </div>
           </div>
         </div>
       </div>

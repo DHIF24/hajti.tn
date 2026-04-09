@@ -19,15 +19,21 @@ export function AdminProducts() {
     setQuickAddLoading(true);
     try {
       const dummyProduct = {
-        name: "Produit Test " + Math.floor(Math.random() * 1000),
-        description: "Description de test générée automatiquement",
-        price: 99.99,
+        name: "Produit Premium " + Math.floor(Math.random() * 1000),
+        description: "Un produit d'exception avec galerie d'images et vidéo de présentation. Parfait pour sublimer votre intérieur avec une touche de modernité et de raffinement.",
+        price: 149.99,
         category: "decors",
-        imageUrl: "https://picsum.photos/seed/test/800/800",
-        stock: 10,
-        rating: 5,
-        featured: false,
-        promotionPercentage: 0,
+        imageUrl: "https://picsum.photos/seed/p1/800/800",
+        images: [
+          "https://picsum.photos/seed/p2/800/800",
+          "https://picsum.photos/seed/p3/800/800",
+          "https://picsum.photos/seed/p4/800/800"
+        ],
+        videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-interior-of-a-modern-living-room-4437-large.mp4",
+        stock: 15,
+        rating: 4.8,
+        featured: true,
+        promotionPercentage: 15,
         createdAt: new Date().toISOString()
       };
       await addDoc(collection(db, 'products'), dummyProduct);
