@@ -30,6 +30,7 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
   const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>([]);
+  const [additionalImageUrl, setAdditionalImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -67,6 +68,13 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
       setAdditionalImageFiles(prev => [...prev, ...files]);
       const newPreviews = files.map(file => URL.createObjectURL(file as Blob));
       setAdditionalImagePreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const handleAddAdditionalImageUrl = () => {
+    if (additionalImageUrl.trim()) {
+      setAdditionalImagePreviews(prev => [...prev, additionalImageUrl.trim()]);
+      setAdditionalImageUrl('');
     }
   };
 
@@ -313,7 +321,25 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-4">Images Additionnelles (Galerie)</label>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-medium text-gray-700">Images Additionnelles (Galerie)</label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="URL de l'image..."
+                  value={additionalImageUrl}
+                  onChange={(e) => setAdditionalImageUrl(e.target.value)}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 focus:ring-1 focus:ring-black outline-none transition-all w-48"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddAdditionalImageUrl}
+                  className="text-[10px] bg-black text-white px-3 py-1.5 rounded-lg font-bold hover:bg-gray-800 transition-all"
+                >
+                  Ajouter URL
+                </button>
+              </div>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
               {additionalImagePreviews.map((preview, index) => (
                 <div key={index} className="relative aspect-square rounded-xl overflow-hidden group">
