@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Product } from '../types';
@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -233,7 +234,14 @@ export function ProductDetail() {
               </button>
             </div>
             
-            <button className="w-full bg-white border-2 border-brand-ink text-brand-ink px-12 py-5 rounded-2xl text-[12px] uppercase tracking-[0.2em] font-bold hover:bg-brand-ink hover:text-white transition-all duration-300 shadow-sm">
+            <button 
+              onClick={() => {
+                handleAddToCart();
+                navigate('/checkout');
+              }}
+              disabled={product.stock === 0}
+              className="w-full bg-white border-2 border-brand-ink text-brand-ink px-12 py-5 rounded-2xl text-[12px] uppercase tracking-[0.2em] font-bold hover:bg-brand-ink hover:text-white transition-all duration-300 shadow-sm"
+            >
               Acheter maintenant
             </button>
           </div>

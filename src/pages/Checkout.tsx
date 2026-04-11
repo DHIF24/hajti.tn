@@ -30,25 +30,15 @@ export function Checkout() {
   }, [items, navigate, step]);
 
   if (!user) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-32 text-center">
-        <h2 className="text-2xl font-light text-gray-900 mb-6 tracking-wide">Connexion requise</h2>
-        <p className="text-gray-500 mb-10 text-sm">Veuillez vous connecter pour finaliser votre commande en toute sécurité.</p>
-        <button 
-          onClick={() => navigate('/auth', { state: { from: { pathname: '/checkout' } } })}
-          className="w-full bg-black text-white py-4 uppercase tracking-[0.15em] text-[11px] font-medium hover:bg-gray-800 transition-colors"
-        >
-          Se connecter
-        </button>
-      </div>
-    );
+    // Guest checkout allowed
   }
 
   const handlePlaceOrder = async () => {
     setLoading(true);
     try {
       const orderData = {
-        userId: user.uid,
+        userId: user?.uid || 'guest',
+        customerEmail: user?.email || 'guest@hajti.tn',
         items,
         total,
         status: 'pending',
@@ -150,7 +140,7 @@ export function Checkout() {
             <CheckCircle className="w-10 h-10 text-green-500" strokeWidth={1.5} />
           </div>
           <h2 className="text-3xl font-light text-gray-900 mb-4 tracking-wide">Commande confirmée</h2>
-          <p className="text-gray-600 mb-2 text-sm">Merci pour votre achat, {user.displayName || user.email}.</p>
+          <p className="text-gray-600 mb-2 text-sm">Merci pour votre achat{user ? `, ${user.displayName || user.email}` : ''}.</p>
           <p className="text-gray-500 text-xs mb-12">Votre numéro de commande est : <span className="font-mono text-gray-900 font-medium">{orderId}</span></p>
           
           <button onClick={() => navigate('/products')} className="inline-block bg-black text-white px-10 py-4 uppercase tracking-[0.15em] text-[11px] font-medium hover:bg-gray-800 transition-colors">
