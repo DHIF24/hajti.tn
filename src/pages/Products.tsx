@@ -14,8 +14,8 @@ export function Products() {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState({
     heroBannerUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
-    heroTitle: "L'Art de Vivre à la Tunisienne",
-    heroSubtitle: "Découvrez une sélection exclusive de pièces artisanales et modernes pour sublimer votre intérieur."
+    heroTitle: "NEW COLLECTION SUMMER",
+    heroSubtitle: "OVERSIZED T-SHIRT URBAN WEAR"
   });
   const [viewMode, setViewMode] = useState<ViewMode>('grid-3');
   
@@ -76,81 +76,6 @@ export function Products() {
   return (
     <div className="w-full min-h-screen">
       
-      {/* Hero Banner */}
-      {!categoryFilter && (
-        <div className="relative h-[80vh] w-full overflow-hidden mb-24">
-          <img 
-            src={settings.heroBannerUrl} 
-            alt="Premium Interior" 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-brand-ink/30 flex flex-col items-center justify-center text-center px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <span className="text-white/80 text-[12px] uppercase tracking-[0.3em] font-medium mb-6 block">Collection 2026</span>
-              <h1 className="text-5xl md:text-7xl text-white font-display font-bold mb-8 tracking-tight max-w-4xl">
-                {settings.heroTitle}
-              </h1>
-              <p className="text-white/90 text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto leading-relaxed">
-                {settings.heroSubtitle}
-              </p>
-              <a 
-                href="#shop-section" 
-                className="inline-block bg-white text-brand-ink px-10 py-4 rounded-full text-[12px] uppercase tracking-[0.2em] font-bold hover:bg-brand-accent hover:text-white transition-all duration-300 shadow-xl"
-              >
-                Découvrir la collection
-              </a>
-            </motion.div>
-          </div>
-        </div>
-      )}
-
-      {/* Promotions Section */}
-      {!categoryFilter && products.some(p => p.promotionPercentage && p.promotionPercentage > 0) && (
-        <div className="w-full pb-24 mb-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center mb-16">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="text-center"
-              >
-                <h2 className="text-4xl md:text-5xl font-display font-bold text-brand-ink mb-4">Les Meilleures Promotions</h2>
-                <p className="text-brand-accent font-medium tracking-[0.1em] uppercase text-sm">Offres limitées — jusqu'à -69%</p>
-              </motion.div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-              {products
-                .filter(p => p.promotionPercentage && p.promotionPercentage > 0)
-                .slice(0, 4)
-                .map((product) => (
-                  <ProductCard 
-                    key={`promo-${product.id}`} 
-                    product={product} 
-                  />
-                ))}
-            </div>
-
-            <div className="mt-16 text-center">
-              <Link 
-                to="/products?promo=true" 
-                className="inline-flex items-center gap-2 text-brand-ink font-bold text-[12px] uppercase tracking-[0.2em] hover:text-brand-accent transition-colors group"
-              >
-                Voir toutes les offres
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div id="shop-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Title */}
         <div className="flex flex-col items-center mb-16">

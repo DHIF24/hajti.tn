@@ -15,8 +15,8 @@ interface AppSettings {
 export function AdminSettings() {
   const [settings, setSettings] = useState<AppSettings>({
     heroBannerUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
-    heroTitle: "L'Art de Vivre à la Tunisienne",
-    heroSubtitle: "Découvrez une sélection exclusive de pièces artisanales et modernes pour sublimer votre intérieur.",
+    heroTitle: "NEW COLLECTION SUMMER",
+    heroSubtitle: "OVERSIZED T-SHIRT URBAN WEAR",
     updatedAt: new Date().toISOString()
   });
   const [loading, setLoading] = useState(true);
