@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Product } from '../types';
 import { ProductCard } from '../components/ProductCard';
@@ -12,6 +12,11 @@ type ViewMode = 'grid-3' | 'list';
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    heroBannerUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
+    heroTitle: "L'Art de Vivre à la Tunisienne",
+    heroSubtitle: "Découvrez une sélection exclusive de pièces artisanales et modernes pour sublimer votre intérieur."
+  });
   const [viewMode, setViewMode] = useState<ViewMode>('grid-3');
   
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,19 +27,27 @@ export function Products() {
   const [inStockOnly, setInStockOnly] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch Settings
+        const settingsRef = doc(db, 'settings', 'general');
+        const settingsSnap = await getDoc(settingsRef);
+        if (settingsSnap.exists()) {
+          setSettings(settingsSnap.data() as any);
+        }
+
+        // Fetch Products
         const q = query(collection(db, 'products'), orderBy('name'));
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(data);
       } catch (error) {
-        console.error("Error fetching products", error);
+        console.error("Error fetching data", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   const categories = useMemo(() => {
@@ -61,13 +74,13 @@ export function Products() {
   };
 
   return (
-    <div className="w-full bg-brand-bg min-h-screen">
+    <div className="w-full min-h-screen">
       
       {/* Hero Banner */}
       {!categoryFilter && (
         <div className="relative h-[80vh] w-full overflow-hidden mb-24">
           <img 
-            src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop" 
+            src={settings.heroBannerUrl} 
             alt="Premium Interior" 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
@@ -80,10 +93,10 @@ export function Products() {
             >
               <span className="text-white/80 text-[12px] uppercase tracking-[0.3em] font-medium mb-6 block">Collection 2026</span>
               <h1 className="text-5xl md:text-7xl text-white font-display font-bold mb-8 tracking-tight max-w-4xl">
-                L'Art de Vivre <br /> à la Tunisienne
+                {settings.heroTitle}
               </h1>
               <p className="text-white/90 text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto leading-relaxed">
-                Découvrez une sélection exclusive de pièces artisanales et modernes pour sublimer votre intérieur.
+                {settings.heroSubtitle}
               </p>
               <a 
                 href="#shop-section" 
@@ -184,7 +197,7 @@ export function Products() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="relative w-full max-w-md bg-brand-bg h-full shadow-2xl flex flex-col"
+              className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between p-8 border-b border-brand-ink/5">
                 <h2 className="text-xl font-display font-bold uppercase tracking-widest text-brand-ink">Filtres</h2>

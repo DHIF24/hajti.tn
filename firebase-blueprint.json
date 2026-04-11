@@ -76,6 +76,17 @@
         "role": { "type": "string", "enum": ["customer", "admin"] }
       },
       "required": ["uid", "email", "role"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global application settings",
+      "type": "object",
+      "properties": {
+        "heroBannerUrl": { "type": "string" },
+        "heroTitle": { "type": "string" },
+        "heroSubtitle": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -94,6 +105,10 @@
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles"
+    },
+    "/settings/{settingId}": {
+      "schema": "Settings",
+      "description": "Global settings"
     }
   }
 }

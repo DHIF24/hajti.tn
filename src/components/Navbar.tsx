@@ -22,7 +22,7 @@ export function Navbar() {
   }, [lastAdded, controls]);
 
   return (
-    <nav className="bg-brand-bg/90 backdrop-blur-md border-b border-brand-ink/5 sticky top-0 z-50 transition-all duration-300 shadow-sm">
+    <nav className="bg-white/90 backdrop-blur-md border-b border-brand-ink/5 sticky top-0 z-50 transition-all duration-300 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-24">
           

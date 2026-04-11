@@ -164,7 +164,7 @@ export function ProductDetail() {
             </AnimatePresence>
 
             {product.stock === 0 && (
-              <div className="absolute top-8 left-8 bg-brand-bg/90 backdrop-blur-md text-brand-ink text-[12px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest shadow-xl">
+              <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md text-brand-ink text-[12px] font-bold px-6 py-2.5 rounded-full uppercase tracking-widest shadow-xl">
                 En Rupture
               </div>
             )}

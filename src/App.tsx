@@ -20,6 +20,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminProducts } from './pages/admin/AdminProducts';
 import { AdminOrders } from './pages/admin/AdminOrders';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminSettings } from './pages/admin/AdminSettings';
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -53,7 +54,7 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="flex flex-col min-h-screen bg-brand-bg text-brand-ink font-sans selection:bg-brand-accent/20">
+    <div className="flex flex-col min-h-screen text-brand-ink font-sans selection:bg-brand-accent/20">
       {!isAdminRoute && <Navbar />}
       <main className="flex-grow">
         <Routes>
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path="products" element={<AdminProducts />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
       </main>

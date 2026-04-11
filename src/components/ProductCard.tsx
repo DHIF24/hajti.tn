@@ -152,7 +152,7 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
           )}
 
           {product.stock === 0 && (
-            <div className="absolute top-4 left-4 bg-brand-bg/80 backdrop-blur-sm text-brand-ink/60 text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
+            <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm text-brand-ink/60 text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
               En Rupture
             </div>
           )}

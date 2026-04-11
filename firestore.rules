@@ -51,5 +51,11 @@ service cloud.firestore {
       allow update: if isAdmin(); // Only admins can update order status
       allow delete: if isAdmin();
     }
+
+    // Settings Collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }
