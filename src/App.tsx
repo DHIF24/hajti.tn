@@ -56,7 +56,7 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen text-brand-ink font-sans selection:bg-brand-accent/20">
       {!isAdminRoute && <Navbar />}
-      <main className="flex-grow">
+      <main className={`flex-grow ${!isAdminRoute ? 'max-w-7xl mx-4 sm:mx-6 lg:mx-auto w-auto lg:w-full bg-white shadow-sm my-8 rounded-xl overflow-hidden' : ''}`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Products />} />
