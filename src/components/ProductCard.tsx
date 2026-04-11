@@ -109,8 +109,8 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
       transition={{ duration: 0.5 }}
       className="h-full"
     >
-      <Link to={`/product/${product.id}`} className="group relative flex flex-col h-full bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-brand-ink/5">
-        <div className="relative aspect-square overflow-hidden bg-[#f8f8f8] rounded-[1.5rem] mb-6">
+      <Link to={`/product/${product.id}`} className="group relative flex flex-col h-full bg-white rounded-2xl md:rounded-[2rem] p-2 md:p-4 shadow-sm hover:shadow-xl transition-all duration-500 border border-brand-ink/5">
+        <div className="relative aspect-square overflow-hidden bg-[#f8f8f8] rounded-xl md:rounded-[1.5rem] mb-3 md:mb-6">
           <img 
             src={product.imageUrl} 
             alt={product.name}
@@ -129,9 +129,9 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
             </div>
           )}
 
-          {/* Quick Add Overlay */}
+          {/* Quick Add Overlay - Hidden on small mobile to save space */}
           {product.stock > 0 && (
-            <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
+            <div className="absolute inset-x-0 bottom-0 p-2 md:p-4 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out hidden md:block">
               <button 
                 onClick={handleQuickAdd}
                 className={`w-full py-4 rounded-2xl text-[11px] uppercase tracking-widest font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-xl ${isAdded ? 'bg-green-600 text-white' : 'bg-white text-brand-ink hover:bg-brand-accent hover:text-white'}`}
@@ -164,21 +164,21 @@ export const ProductCard: React.FC<{ product: Product; listView?: boolean; badge
               <Star key={i} className="w-2.5 h-2.5 fill-brand-accent text-brand-accent" />
             ))}
           </div>
-          <h3 className="text-[15px] text-brand-ink font-display font-semibold mb-3 line-clamp-1">
+          <h3 className="text-[13px] md:text-[15px] text-brand-ink font-display font-semibold mb-1 md:mb-3 line-clamp-1">
             {product.name}
           </h3>
           <div className="mt-auto flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[16px] text-brand-accent font-bold">
+              <span className="text-[14px] md:text-[16px] text-brand-accent font-bold">
                 {product.price.toFixed(2)} TND
               </span>
               {hasPromotion && (
-                <span className="text-[12px] text-brand-ink/30 line-through font-light">
+                <span className="text-[10px] md:text-[12px] text-brand-ink/30 line-through font-light">
                   {originalPrice.toFixed(2)} TND
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 text-[9px] text-brand-ink/40 uppercase tracking-tighter font-bold">
+            <div className="hidden sm:flex items-center gap-1 text-[9px] text-brand-ink/40 uppercase tracking-tighter font-bold">
               <Truck className="w-3 h-3" />
               Tunisie
             </div>

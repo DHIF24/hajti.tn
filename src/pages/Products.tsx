@@ -70,7 +70,7 @@ export function Products() {
 
   const getGridClass = () => {
     if (viewMode === 'list') return 'flex flex-col gap-y-12';
-    return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16';
+    return 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-16';
   };
 
   return (
