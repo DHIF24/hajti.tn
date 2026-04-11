@@ -7,7 +7,7 @@ import { motion, useAnimation } from 'motion/react';
 
 export function Navbar() {
   const { user } = useAuth();
-  const { itemCount, lastAdded } = useCart();
+  const { itemCount, lastAdded, total } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const controls = useAnimation();
 
@@ -60,20 +60,23 @@ export function Navbar() {
               </button>
             </div>
 
-            <Link to="/cart" className="relative text-brand-ink/70 hover:text-brand-accent transition-colors">
-              <motion.div animate={controls}>
-                <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
-              </motion.div>
-              {itemCount > 0 && (
+            <Link to="/cart" className="flex items-center gap-2 sm:gap-3 bg-[#00AEEF] text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-sm hover:bg-[#0096ce] transition-all duration-300 shadow-sm group">
+              <div className="relative">
+                <motion.div animate={controls}>
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
+                </motion.div>
                 <motion.span 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   key={itemCount}
-                  className="absolute -top-1 -right-2 bg-brand-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                  className="absolute -bottom-1.5 -left-1.5 sm:-bottom-2 sm:-left-2 bg-[#2D3436] text-white text-[9px] sm:text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-[#00AEEF]"
                 >
                   {itemCount}
                 </motion.span>
-              )}
+              </div>
+              <span className="text-[14px] sm:text-[16px] font-bold tracking-tight whitespace-nowrap">
+                {total.toLocaleString('fr-TN', { minimumFractionDigits: 3 })} د.ت
+              </span>
             </Link>
 
             {/* Mobile Icons (Search & User) */}
