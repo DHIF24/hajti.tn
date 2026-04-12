@@ -90,39 +90,31 @@ export function Navbar() {
               </Link>
             </div>
 
-            <Link to="/cart" className="relative text-brand-ink/70 hover:text-brand-accent transition-colors">
-              <motion.div animate={controls}>
-                <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
-              </motion.div>
-              {itemCount > 0 && (
-                <motion.span 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  key={itemCount}
-                  className="absolute -top-1 -right-2 bg-brand-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
-                >
-                  {itemCount}
-                </motion.span>
-              )}
-            </Link>
-
-            {/* Mobile Icons (Search & User) */}
-            <div className="lg:hidden flex items-center space-x-4">
-              <Link to="/auth" className="text-gray-600 hover:text-black transition-colors">
-                <UserIcon className="w-5 h-5" strokeWidth={1.5} />
+            <div className="hidden lg:block">
+              <Link to="/cart" className="relative text-brand-ink/70 hover:text-brand-accent transition-colors">
+                <motion.div animate={controls}>
+                  <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                </motion.div>
+                {itemCount > 0 && (
+                  <motion.span 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    key={itemCount}
+                    className="absolute -top-1 -right-2 bg-brand-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                  >
+                    {itemCount}
+                  </motion.span>
+                )}
               </Link>
-              <button className="text-gray-600 hover:text-black transition-colors">
-                <Search className="w-5 h-5" strokeWidth={1.5} />
-              </button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden flex items-center">
+            {/* Mobile Search Button (Quick access) */}
+            <div className="lg:hidden">
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-600 hover:text-gray-900 ml-2"
+                className="text-brand-ink/70 hover:text-brand-accent transition-colors p-2"
               >
-                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                <Search className="w-5 h-5" strokeWidth={1.5} />
               </button>
             </div>
           </div>

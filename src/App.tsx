@@ -13,6 +13,9 @@ import { About } from './pages/About';
 import { AdminSeed } from './pages/AdminSeed';
 import { Auth } from './pages/Auth';
 
+import { ShoppingBag, Home, Search, User, Heart } from 'lucide-react';
+import { useCart } from './context/CartContext';
+
 // Admin Pages
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminLayout } from './pages/admin/AdminLayout';
@@ -52,11 +55,12 @@ function ScrollToTop() {
 function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const { itemCount } = useCart();
 
   return (
-    <div className="flex flex-col min-h-screen text-brand-ink font-sans selection:bg-brand-accent/20">
+    <div className="flex flex-col min-h-screen text-brand-ink font-sans selection:bg-brand-accent/20 bg-gray-50/50">
       {!isAdminRoute && <Navbar />}
-      <main className={`flex-grow ${!isAdminRoute ? 'max-w-full mx-4 md:mx-[120px] bg-white shadow-sm my-4 md:my-8 rounded-xl overflow-hidden' : ''}`}>
+      <main className={`flex-grow ${!isAdminRoute ? 'max-w-full md:mx-[120px] md:bg-white md:shadow-sm md:my-8 md:rounded-xl overflow-hidden' : ''}`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Products />} />
@@ -81,11 +85,38 @@ function AppContent() {
       </main>
       {!isAdminRoute && <Footer />}
       
+      {/* Mobile Bottom Navigation */}
+      {!isAdminRoute && (
+        <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100 px-6 py-3 z-50 flex justify-between items-center shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+          <Link to="/" className={`flex flex-col items-center gap-1 ${location.pathname === '/' || location.pathname === '/products' ? 'text-brand-accent' : 'text-gray-400'}`}>
+            <Home className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Accueil</span>
+          </Link>
+          <Link to="/products" className={`flex flex-col items-center gap-1 ${location.pathname === '/products' ? 'text-brand-accent' : 'text-gray-400'}`}>
+            <Search className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Boutique</span>
+          </Link>
+          <Link to="/cart" className={`flex flex-col items-center gap-1 relative ${location.pathname === '/cart' ? 'text-brand-accent' : 'text-gray-400'}`}>
+            <ShoppingBag className="w-5 h-5" />
+            {itemCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-brand-accent text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                {itemCount}
+              </span>
+            )}
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Panier</span>
+          </Link>
+          <Link to="/auth" className={`flex flex-col items-center gap-1 ${location.pathname === '/auth' ? 'text-brand-accent' : 'text-gray-400'}`}>
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Compte</span>
+          </Link>
+        </div>
+      )}
+
       {/* Floating Elements */}
       {!isAdminRoute && (
-        <>
+        <div className="hidden md:block">
           <StickyCart />
-        </>
+        </div>
       )}
     </div>
   );

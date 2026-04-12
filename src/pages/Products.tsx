@@ -115,10 +115,31 @@ export function Products() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50/30">
-      <div id="shop-section" className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 py-12">
+      {/* Mobile Category Scroll */}
+      <div className="lg:hidden bg-white border-b border-gray-100 sticky top-24 z-40 overflow-x-auto no-scrollbar py-4 px-4">
+        <div className="flex gap-3 min-w-max">
+          <button 
+            onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}
+            className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${!categoryFilter ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
+          >
+            Tous
+          </button>
+          {categories.map(cat => (
+            <button 
+              key={cat}
+              onClick={() => { searchParams.set('category', cat.toLowerCase()); setSearchParams(searchParams); }}
+              className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div id="shop-section" className="max-w-full mx-auto px-4 sm:px-4 lg:px-6 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="lg:w-72 flex-shrink-0 space-y-10">
+          {/* Sidebar - Desktop Only */}
+          <aside className="hidden lg:block lg:w-72 flex-shrink-0 space-y-10">
             {/* Categories Section */}
             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/30 border border-gray-50 overflow-hidden relative group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/5 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover:scale-110" />
@@ -230,7 +251,7 @@ export function Products() {
                 className="sm:border-l border-brand-ink/10 sm:pl-8 cursor-pointer hover:text-brand-accent transition-all duration-300 flex items-center gap-3 group w-full sm:w-auto justify-center sm:justify-end"
                 onClick={() => setIsFilterOpen(true)}
               >
-                <span className="group-hover:translate-x-[-4px] transition-transform">Trier</span>
+                <span className="group-hover:translate-x-[-4px] transition-transform">Filtrer & Trier</span>
                 <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-brand-accent group-hover:text-white transition-colors">
                   <ChevronRight className="w-4 h-4 rotate-90" />
                 </div>

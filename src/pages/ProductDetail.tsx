@@ -93,16 +93,16 @@ export function ProductDetail() {
         <span className="text-brand-ink">{product.name}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-20">
         {/* Image Gallery */}
-        <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-6">
+        <div className="lg:col-span-7 flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Thumbnails */}
-          <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar">
+          <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar pb-2 md:pb-0">
             {allImages.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveImage(img)}
-                className={`relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 ${activeImage === img ? 'border-brand-accent scale-95 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                className={`relative w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 ${activeImage === img ? 'border-brand-accent scale-95 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
                 <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-cover" />
               </button>
@@ -118,7 +118,7 @@ export function ProductDetail() {
           </div>
 
           {/* Main View */}
-          <div className="flex-grow relative aspect-square bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-brand-ink/5">
+          <div className="flex-grow relative aspect-square bg-white rounded-3xl md:rounded-[2.5rem] overflow-hidden shadow-sm border border-brand-ink/5">
             <AnimatePresence mode="wait">
               {activeImage === 'video' ? (
                 <motion.div
@@ -173,17 +173,17 @@ export function ProductDetail() {
         </div>
 
         {/* Product Info */}
-        <div className="lg:col-span-5 flex flex-col justify-center py-4">
-          <div className="mb-8">
-            <span className="text-brand-accent text-[12px] uppercase tracking-[0.3em] font-bold mb-4 block">
+        <div className="lg:col-span-5 flex flex-col justify-center py-0 md:py-4">
+          <div className="mb-6 md:mb-8">
+            <span className="text-brand-accent text-[10px] md:text-[12px] uppercase tracking-[0.3em] font-bold mb-2 md:mb-4 block">
               {product.category}
             </span>
-            <h1 className="text-4xl lg:text-5xl font-display font-bold text-brand-ink mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-brand-ink mb-4 md:mb-6 leading-tight">
               {product.name}
             </h1>
             
-            <div className="flex items-center gap-6 mb-8">
-              <div className="text-3xl text-brand-ink font-bold">
+            <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8">
+              <div className="text-2xl md:text-3xl text-brand-ink font-bold">
                 {product.price.toFixed(2)} TND
               </div>
               {product.promotionPercentage && (
