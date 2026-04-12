@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingBag, Search, User as UserIcon, Menu, X } from 'lucide-react';
+import { useState, useEffect, ChangeEvent } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { ShoppingBag, Search, User as UserIcon, Menu, X, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { motion, useAnimation } from 'motion/react';
@@ -9,7 +9,24 @@ export function Navbar() {
   const { user } = useAuth();
   const { itemCount, lastAdded } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const controls = useAnimation();
+
+  const searchQuery = searchParams.get('q') || '';
+
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) {
+      searchParams.set('q', value);
+    } else {
+      searchParams.delete('q');
+    }
+    setSearchParams(searchParams);
+    if (window.location.pathname !== '/' && window.location.pathname !== '/products') {
+      navigate('/products?' + searchParams.toString());
+    }
+  };
 
   useEffect(() => {
     if (lastAdded) {
@@ -23,7 +40,7 @@ export function Navbar() {
 
   return (
     <nav className="bg-white/90 backdrop-blur-md border-b border-brand-ink/5 sticky top-0 z-50 transition-all duration-300 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-4 md:mx-[120px]">
         <div className="flex justify-between items-center h-24">
           
           {/* Left Side: Logo & Navigation */}
@@ -40,13 +57,29 @@ export function Navbar() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8 text-[14px] tracking-widest text-brand-ink/70 font-medium uppercase">
               <Link to="/" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Accueil</Link>
-              <Link to="/products" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Shop</Link>
-              <Link to="/products?category=decors" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Décors</Link>
-              <Link to="/products?category=salle-de-bain" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Salle de bain</Link>
-              <Link to="/products?category=cuisine" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Cuisine</Link>
-              <Link to="/products?category=art" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Art de table</Link>
-              <Link to="/products?category=rangement" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Rangement</Link>
             </div>
+          </div>
+
+          {/* Search Bar in Middle */}
+          <div className="hidden lg:block relative w-96 group mx-8">
+            <input 
+              type="text" 
+              placeholder="Rechercher des produits..." 
+              value={searchQuery}
+              onChange={handleSearch}
+              className="w-full bg-gray-50 border border-transparent rounded-2xl px-5 py-2.5 text-brand-ink placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-brand-accent/20 focus:ring-4 focus:ring-brand-accent/5 transition-all duration-300 text-sm normal-case tracking-normal"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-brand-accent transition-colors">
+              <Search className="w-4 h-4" strokeWidth={2.5} />
+            </div>
+            {searchQuery && (
+              <button 
+                onClick={() => { searchParams.delete('q'); setSearchParams(searchParams); }}
+                className="absolute right-10 top-1/2 -translate-y-1/2 p-1 text-gray-300 hover:text-brand-ink transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Right Side: Icons & Mobile Menu */}
@@ -55,9 +88,6 @@ export function Navbar() {
               <Link to="/auth" className="text-brand-ink/70 hover:text-brand-accent transition-colors">
                 <UserIcon className="w-5 h-5" strokeWidth={1.5} />
               </Link>
-              <button className="text-brand-ink/70 hover:text-brand-accent transition-colors">
-                <Search className="w-5 h-5" strokeWidth={1.5} />
-              </button>
             </div>
 
             <Link to="/cart" className="relative text-brand-ink/70 hover:text-brand-accent transition-colors">
@@ -103,14 +133,20 @@ export function Navbar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-lg">
-          <div className="px-4 py-6 space-y-2 flex flex-col text-[16px] text-gray-600 font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+          <div className="px-4 py-6 space-y-4 flex flex-col text-[16px] text-gray-600 font-medium" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Accueil</Link>
-            <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Shop</Link>
-            <Link to="/products?category=decors" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Décors</Link>
-            <Link to="/products?category=salle-de-bain" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Salle de bain</Link>
-            <Link to="/products?category=cuisine" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Cuisine</Link>
-            <Link to="/products?category=art" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Art de table</Link>
-            <Link to="/products?category=rangement" onClick={() => setIsMobileMenuOpen(false)} className="hover:bg-gray-50 hover:text-black transition-colors px-4 py-3 rounded-lg">Rangement</Link>
+            
+            {/* Mobile Search */}
+            <div className="px-4 relative">
+              <input 
+                type="text" 
+                placeholder="Rechercher..." 
+                value={searchQuery}
+                onChange={handleSearch}
+                className="w-full bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-brand-ink placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-brand-accent/20 transition-all text-sm"
+              />
+              <Search className="absolute right-8 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            </div>
           </div>
         </div>
       )}
