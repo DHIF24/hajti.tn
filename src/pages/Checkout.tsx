@@ -15,6 +15,7 @@ export function Checkout() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const SHIPPING_FEE = 7;
 
   const [address, setAddress] = useState({
     fullName: '',
@@ -41,7 +42,9 @@ export function Checkout() {
         userId: user?.uid || 'guest',
         customerEmail: user?.email || 'guest@hajti.tn',
         items,
-        total,
+        subtotal: total,
+        shippingFee: SHIPPING_FEE,
+        total: total + SHIPPING_FEE,
         status: 'pending',
         createdAt: new Date().toISOString(),
         shippingAddress: address
@@ -202,8 +205,12 @@ export function Checkout() {
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-4">
-                  <button 
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-2xl">
+              <span className="text-sm font-bold text-brand-ink">Total à payer</span>
+              <span className="text-lg font-bold text-brand-accent">{(total + SHIPPING_FEE).toFixed(2)} TND</span>
+            </div>
+            <button 
                     onClick={handlePlaceOrder} 
                     disabled={loading}
                     className="w-full bg-brand-ink text-white py-5 rounded-2xl uppercase tracking-[0.2em] text-[12px] font-bold hover:bg-brand-accent transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
@@ -272,11 +279,11 @@ export function Checkout() {
                 </div>
                 <div className="flex justify-between text-sm text-brand-ink/60">
                   <span>Livraison</span>
-                  <span className="text-green-600 font-bold">Gratuite</span>
+                  <span className="text-brand-ink font-bold">{SHIPPING_FEE.toFixed(2)} TND</span>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-gray-50">
                   <span className="text-lg font-display font-bold text-brand-ink">Total</span>
-                  <span className="text-2xl font-bold text-brand-accent">{total.toFixed(2)} TND</span>
+                  <span className="text-2xl font-bold text-brand-accent">{(total + SHIPPING_FEE).toFixed(2)} TND</span>
                 </div>
               </div>
 
@@ -287,7 +294,7 @@ export function Checkout() {
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-brand-ink/40 uppercase tracking-widest font-bold">
                   <Truck className="w-4 h-4 text-brand-accent" />
-                  Livraison Express en Tunisie
+                  Livraison {SHIPPING_FEE.toFixed(2)} TND en Tunisie
                 </div>
               </div>
             </div>

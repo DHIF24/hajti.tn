@@ -127,7 +127,7 @@ export function Cart() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-medium">Livraison</span>
-                <span className="text-gray-400 text-sm">Calculée à l'étape suivante</span>
+                <span className="font-medium text-gray-900">7.00 TND</span>
               </div>
             </div>
 
@@ -135,7 +135,7 @@ export function Cart() {
               <div className="flex justify-between items-end">
                 <span className="text-lg font-medium text-gray-900">Total</span>
                 <div className="text-right">
-                  <span className="text-2xl font-bold text-gray-900 block">{total.toFixed(2)} TND</span>
+                  <span className="text-2xl font-bold text-gray-900 block">{(total + 7).toFixed(2)} TND</span>
                   <span className="text-xs text-gray-400">Taxes incluses</span>
                 </div>
               </div>
