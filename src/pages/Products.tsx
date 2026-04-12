@@ -3,7 +3,7 @@ import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/fires
 import { db } from '../firebase';
 import { Product } from '../types';
 import { ProductCard } from '../components/ProductCard';
-import { Grid3X3, AlignJustify, X, ArrowRight, Check } from 'lucide-react';
+import { Grid3X3, AlignJustify, X, ArrowRight, Check, Search } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 
@@ -25,6 +25,7 @@ export function Products() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState('name'); // 'name', 'price-asc', 'price-desc'
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +60,14 @@ export function Products() {
       .filter(p => {
         if (categoryFilter && p.category.toLowerCase() !== categoryFilter.toLowerCase()) return false;
         if (inStockOnly && p.stock === 0) return false;
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          return (
+            p.name.toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query) ||
+            (p.description && p.description.toLowerCase().includes(query))
+          );
+        }
         return true;
       })
       .sort((a, b) => {
@@ -77,12 +86,38 @@ export function Products() {
     <div className="w-full min-h-screen">
       
       <div id="shop-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Title */}
-        <div className="flex flex-col items-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-brand-ink mb-4">
-            {categoryFilter ? categoryFilter : 'Tous les Produits'}
-          </h2>
-          <div className="w-12 h-1 bg-brand-accent rounded-full"></div>
+        {/* Search Bar */}
+        <div className="max-w-2xl mx-auto mb-16">
+          <div className="relative group">
+            <input 
+              type="text" 
+              placeholder="Rechercher des produits, catégories..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-8 py-5 text-brand-ink placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-brand-accent/5 focus:bg-white focus:border-brand-accent/20 transition-all duration-300 shadow-sm text-lg"
+            />
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 p-2">
+              <Search className="w-6 h-6 text-brand-accent" strokeWidth={2.5} />
+            </div>
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-16 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-brand-ink transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+          {categoryFilter && (
+            <div className="mt-4 flex justify-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-ink text-white rounded-full text-[10px] font-bold uppercase tracking-widest">
+                Catégorie: {categoryFilter}
+                <button onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}>
+                  <X className="w-3 h-3 hover:text-brand-accent transition-colors" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Toolbar */}
