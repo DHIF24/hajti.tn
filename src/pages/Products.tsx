@@ -47,6 +47,7 @@ export function Products() {
   const [sortBy, setSortBy] = useState('name'); // 'name', 'price-asc', 'price-desc'
   const [inStockOnly, setInStockOnly] = useState(false);
   const [showOffers, setShowOffers] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,24 +119,60 @@ export function Products() {
   return (
     <div className="w-full min-h-screen bg-gray-50/30">
       {/* Mobile Category Scroll */}
-      <div className="lg:hidden bg-white border-b border-gray-100 sticky top-14 z-40 overflow-x-auto no-scrollbar pt-0 pb-4 px-4 m-0">
-        <div className="flex gap-3 min-w-max">
-          <button 
-            onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}
-            className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${!categoryFilter ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
-          >
-            Tous
-          </button>
-          {categories.map(cat => (
+      <div className="lg:hidden bg-white border-b border-gray-100 sticky top-14 z-40 pt-0 pb-4 px-4 m-0">
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex gap-3 min-w-max">
             <button 
-              key={cat}
-              onClick={() => { searchParams.set('category', cat.toLowerCase()); setSearchParams(searchParams); }}
-              className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
+              onClick={() => { searchParams.delete('category'); searchParams.delete('gender'); setSearchParams(searchParams); }}
+              className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${!categoryFilter ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
             >
-              {cat}
+              Tous
             </button>
-          ))}
+            {categories.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => { 
+                  searchParams.set('category', cat.toLowerCase()); 
+                  if (cat.toLowerCase() !== 'accessoires') searchParams.delete('gender');
+                  setSearchParams(searchParams); 
+                }}
+                className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Mobile Sub-categories for Accessoires */}
+        <AnimatePresence>
+          {categoryFilter?.toLowerCase() === 'accessoires' && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="flex gap-2 mt-3 pt-3 border-t border-gray-50 overflow-x-auto no-scrollbar"
+            >
+              {[
+                { id: null, label: 'Tous' },
+                { id: 'fille', label: 'Femme' },
+                { id: 'garcon', label: 'Homme' }
+              ].map(sub => (
+                <button
+                  key={sub.id || 'all'}
+                  onClick={() => {
+                    if (sub.id) searchParams.set('gender', sub.id);
+                    else searchParams.delete('gender');
+                    setSearchParams(searchParams);
+                  }}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${genderFilter === sub.id || (!genderFilter && sub.id === null) ? 'bg-brand-accent text-white' : 'bg-gray-50 text-brand-ink/40'}`}
+                >
+                  {sub.label}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div id="shop-section" className="max-w-full mx-auto px-4 sm:px-4 lg:px-6 py-8 lg:py-12">
@@ -168,25 +205,68 @@ export function Products() {
                   </button>
                   
                   {categories.map(cat => (
-                    <button 
+                    <div 
                       key={cat}
-                      onClick={() => { searchParams.set('category', cat.toLowerCase()); setSearchParams(searchParams); }}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group/item ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-xl shadow-brand-ink/20' : 'hover:bg-gray-50 text-brand-ink/60 hover:text-brand-ink'}`}
+                      onMouseEnter={() => setHoveredCategory(cat.toLowerCase())}
+                      onMouseLeave={() => setHoveredCategory(null)}
+                      className="relative"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-xl transition-colors ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-white/10' : 'bg-gray-100 group-hover/item:bg-white'}`}>
-                          {getCategoryIcon(cat)}
+                      <button 
+                        onClick={() => { 
+                          searchParams.set('category', cat.toLowerCase()); 
+                          if (cat.toLowerCase() !== 'accessoires') searchParams.delete('gender');
+                          setSearchParams(searchParams); 
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group/item ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-xl shadow-brand-ink/20' : 'hover:bg-gray-50 text-brand-ink/60 hover:text-brand-ink'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-xl transition-colors ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-white/10' : 'bg-gray-100 group-hover/item:bg-white'}`}>
+                            {getCategoryIcon(cat)}
+                          </div>
+                          <span className="text-sm font-bold tracking-wide capitalize">{cat}</span>
                         </div>
-                        <span className="text-sm font-bold tracking-wide capitalize">{cat}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {categoryFilter?.toLowerCase() === cat.toLowerCase() ? (
-                          <div className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all" />
-                        )}
-                      </div>
-                    </button>
+                        <div className="flex items-center gap-3">
+                          {cat.toLowerCase() === 'accessoires' && (
+                            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${hoveredCategory === 'accessoires' ? 'rotate-90' : ''}`} />
+                          )}
+                          {categoryFilter?.toLowerCase() === cat.toLowerCase() && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Sub-menu for Accessoires */}
+                      {cat.toLowerCase() === 'accessoires' && (
+                        <AnimatePresence>
+                          {(hoveredCategory === 'accessoires' || (categoryFilter?.toLowerCase() === 'accessoires')) && (
+                            <motion.div 
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden pl-12 space-y-1 mt-1"
+                            >
+                              {[
+                                { id: 'fille', label: 'Femme' },
+                                { id: 'garcon', label: 'Homme' }
+                              ].map(sub => (
+                                <button
+                                  key={sub.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    searchParams.set('category', 'accessoires');
+                                    searchParams.set('gender', sub.id);
+                                    setSearchParams(searchParams);
+                                  }}
+                                  className={`w-full text-left px-4 py-2 rounded-xl text-xs font-bold transition-all ${genderFilter === sub.id ? 'text-brand-accent bg-brand-accent/5' : 'text-brand-ink/40 hover:text-brand-ink hover:bg-gray-50'}`}
+                                >
+                                  {sub.label}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -232,15 +312,6 @@ export function Products() {
           <div className="flex-grow">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-[2rem] px-4 sm:px-8 py-5 mb-8 md:mb-12 shadow-xl shadow-gray-200/20 border border-gray-50 text-[11px] tracking-[0.2em] text-brand-ink/50 uppercase font-bold gap-4 sm:gap-0">
-              {categoryFilter?.toLowerCase() === 'accessoires' && genderFilter && (
-                <button 
-                  onClick={() => { searchParams.delete('gender'); setSearchParams(searchParams); }}
-                  className="md:hidden flex items-center gap-2 text-brand-accent mb-4 border-b border-brand-accent/20 pb-2 w-full justify-center"
-                >
-                  <ChevronRight className="w-4 h-4 rotate-180" />
-                  Retour aux univers
-                </button>
-              )}
               <div className="hidden sm:flex gap-6 border-r border-brand-ink/10 pr-8 w-auto justify-start">
                 <Grid3X3 
                   className={`w-5 h-5 cursor-pointer transition-all duration-500 ${viewMode === 'grid-3' ? 'text-brand-accent scale-125' : 'text-brand-ink/20 hover:text-brand-ink'}`} 
@@ -255,17 +326,7 @@ export function Products() {
               </div>
               
               <div className="hidden md:block flex-grow text-center text-brand-ink/30 font-bold">
-                {categoryFilter?.toLowerCase() === 'accessoires' && genderFilter ? (
-                  <button 
-                    onClick={() => { searchParams.delete('gender'); setSearchParams(searchParams); }}
-                    className="flex items-center gap-2 mx-auto text-brand-accent hover:underline"
-                  >
-                    <ChevronRight className="w-4 h-4 rotate-180" />
-                    Retour aux univers
-                  </button>
-                ) : (
-                  <>{loading ? '...' : filteredProducts.length} Produits trouvés</>
-                )}
+                {loading ? '...' : filteredProducts.length} Produits trouvés
               </div>
               
               <div 
@@ -279,53 +340,12 @@ export function Products() {
               </div>
             </div>
 
-            {/* Product Grid or Gender Selection */}
+            {/* Product Grid */}
             {loading ? (
               <div className={getGridClass()}>
                 {[1, 2, 3, 4, 5, 6].map(i => (
                   <div key={i} className={`animate-pulse bg-white rounded-[2.5rem] ${viewMode === 'list' ? 'h-64 w-full' : 'aspect-[4/5]'}`} />
                 ))}
-              </div>
-            ) : categoryFilter?.toLowerCase() === 'accessoires' && !genderFilter ? (
-              <div className="space-y-12 py-8">
-                <div className="text-center space-y-4">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold text-brand-ink uppercase tracking-tight">Choisissez votre univers</h2>
-                  <p className="text-brand-ink/40 text-sm md:text-base max-w-md mx-auto">Sélectionnez une catégorie pour découvrir notre collection d'accessoires.</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                  {[
-                    { id: 'fille', label: 'Femme', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop', color: 'bg-pink-50' },
-                    { id: 'garcon', label: 'Homme', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop', color: 'bg-blue-50' },
-                    { id: 'mixte', label: 'Mixte', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop', color: 'bg-gray-50' }
-                  ].map((choice) => (
-                    <motion.button
-                      key={choice.id}
-                      whileHover={{ y: -10 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        searchParams.set('gender', choice.id);
-                        setSearchParams(searchParams);
-                      }}
-                      className="group relative aspect-[4/5] md:aspect-[3/4] rounded-[3rem] overflow-hidden shadow-2xl shadow-gray-200/50 border border-white"
-                    >
-                      <img 
-                        src={choice.image} 
-                        alt={choice.label} 
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/80 via-brand-ink/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 w-full p-8 text-left">
-                        <span className="inline-block px-4 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-3 shadow-lg">Découvrir</span>
-                        <h3 className="text-3xl font-display font-bold text-white uppercase tracking-wider">{choice.label}</h3>
-                        <div className="mt-4 flex items-center gap-2 text-white/60 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
-                          Voir la collection <ArrowRight className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
               </div>
             ) : (
               <div className={getGridClass()}>
@@ -335,7 +355,7 @@ export function Products() {
               </div>
             )}
             
-            {!loading && filteredProducts.length === 0 && (categoryFilter?.toLowerCase() !== 'accessoires' || genderFilter) && (
+            {!loading && filteredProducts.length === 0 && (
               <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-gray-200">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Search className="w-8 h-8 text-gray-300" />
