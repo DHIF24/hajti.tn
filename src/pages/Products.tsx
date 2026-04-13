@@ -230,7 +230,7 @@ export function Products() {
           <div className="flex-grow">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-[2rem] px-4 sm:px-8 py-5 mb-8 md:mb-12 shadow-xl shadow-gray-200/20 border border-gray-50 text-[11px] tracking-[0.2em] text-brand-ink/50 uppercase font-bold gap-4 sm:gap-0">
-              <div className="flex gap-6 border-b sm:border-b-0 sm:border-r border-brand-ink/10 pb-4 sm:pb-0 sm:pr-8 w-full sm:w-auto justify-center sm:justify-start">
+              <div className="hidden sm:flex gap-6 border-r border-brand-ink/10 pr-8 w-auto justify-start">
                 <Grid3X3 
                   className={`w-5 h-5 cursor-pointer transition-all duration-500 ${viewMode === 'grid-3' ? 'text-brand-accent scale-125' : 'text-brand-ink/20 hover:text-brand-ink'}`} 
                   strokeWidth={2.5} 
