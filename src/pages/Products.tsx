@@ -232,6 +232,15 @@ export function Products() {
           <div className="flex-grow">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-[2rem] px-4 sm:px-8 py-5 mb-8 md:mb-12 shadow-xl shadow-gray-200/20 border border-gray-50 text-[11px] tracking-[0.2em] text-brand-ink/50 uppercase font-bold gap-4 sm:gap-0">
+              {categoryFilter?.toLowerCase() === 'accessoires' && genderFilter && (
+                <button 
+                  onClick={() => { searchParams.delete('gender'); setSearchParams(searchParams); }}
+                  className="md:hidden flex items-center gap-2 text-brand-accent mb-4 border-b border-brand-accent/20 pb-2 w-full justify-center"
+                >
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                  Retour aux univers
+                </button>
+              )}
               <div className="hidden sm:flex gap-6 border-r border-brand-ink/10 pr-8 w-auto justify-start">
                 <Grid3X3 
                   className={`w-5 h-5 cursor-pointer transition-all duration-500 ${viewMode === 'grid-3' ? 'text-brand-accent scale-125' : 'text-brand-ink/20 hover:text-brand-ink'}`} 
@@ -246,7 +255,17 @@ export function Products() {
               </div>
               
               <div className="hidden md:block flex-grow text-center text-brand-ink/30 font-bold">
-                {loading ? '...' : filteredProducts.length} Produits trouvés
+                {categoryFilter?.toLowerCase() === 'accessoires' && genderFilter ? (
+                  <button 
+                    onClick={() => { searchParams.delete('gender'); setSearchParams(searchParams); }}
+                    className="flex items-center gap-2 mx-auto text-brand-accent hover:underline"
+                  >
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                    Retour aux univers
+                  </button>
+                ) : (
+                  <>{loading ? '...' : filteredProducts.length} Produits trouvés</>
+                )}
               </div>
               
               <div 
@@ -260,12 +279,53 @@ export function Products() {
               </div>
             </div>
 
-            {/* Product Grid */}
+            {/* Product Grid or Gender Selection */}
             {loading ? (
               <div className={getGridClass()}>
                 {[1, 2, 3, 4, 5, 6].map(i => (
                   <div key={i} className={`animate-pulse bg-white rounded-[2.5rem] ${viewMode === 'list' ? 'h-64 w-full' : 'aspect-[4/5]'}`} />
                 ))}
+              </div>
+            ) : categoryFilter?.toLowerCase() === 'accessoires' && !genderFilter ? (
+              <div className="space-y-12 py-8">
+                <div className="text-center space-y-4">
+                  <h2 className="text-3xl md:text-4xl font-display font-bold text-brand-ink uppercase tracking-tight">Choisissez votre univers</h2>
+                  <p className="text-brand-ink/40 text-sm md:text-base max-w-md mx-auto">Sélectionnez une catégorie pour découvrir notre collection d'accessoires.</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                  {[
+                    { id: 'fille', label: 'Femme', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop', color: 'bg-pink-50' },
+                    { id: 'garcon', label: 'Homme', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop', color: 'bg-blue-50' },
+                    { id: 'mixte', label: 'Mixte', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop', color: 'bg-gray-50' }
+                  ].map((choice) => (
+                    <motion.button
+                      key={choice.id}
+                      whileHover={{ y: -10 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        searchParams.set('gender', choice.id);
+                        setSearchParams(searchParams);
+                      }}
+                      className="group relative aspect-[4/5] md:aspect-[3/4] rounded-[3rem] overflow-hidden shadow-2xl shadow-gray-200/50 border border-white"
+                    >
+                      <img 
+                        src={choice.image} 
+                        alt={choice.label} 
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/80 via-brand-ink/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 w-full p-8 text-left">
+                        <span className="inline-block px-4 py-1.5 bg-brand-accent text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-3 shadow-lg">Découvrir</span>
+                        <h3 className="text-3xl font-display font-bold text-white uppercase tracking-wider">{choice.label}</h3>
+                        <div className="mt-4 flex items-center gap-2 text-white/60 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
+                          Voir la collection <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className={getGridClass()}>
@@ -275,7 +335,7 @@ export function Products() {
               </div>
             )}
             
-            {!loading && filteredProducts.length === 0 && (
+            {!loading && filteredProducts.length === 0 && (categoryFilter?.toLowerCase() !== 'accessoires' || genderFilter) && (
               <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-gray-200">
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Search className="w-8 h-8 text-gray-300" />
@@ -359,8 +419,8 @@ export function Products() {
                     <div className="grid grid-cols-1 gap-3">
                       {[
                         { id: null, label: 'Tous les genres' },
-                        { id: 'fille', label: 'Fille' },
-                        { id: 'garcon', label: 'Garçon' },
+                        { id: 'fille', label: 'Femme' },
+                        { id: 'garcon', label: 'Homme' },
                         { id: 'mixte', label: 'Mixte' }
                       ].map((option) => (
                         <button

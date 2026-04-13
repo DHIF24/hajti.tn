@@ -207,8 +207,8 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all"
                   >
-                    <option value="fille">Fille</option>
-                    <option value="garcon">Garçon</option>
+                    <option value="fille">Femme</option>
+                    <option value="garcon">Homme</option>
                     <option value="mixte">Mixte</option>
                   </select>
                 </div>
