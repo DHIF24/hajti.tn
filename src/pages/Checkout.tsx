@@ -52,6 +52,17 @@ export function Checkout() {
 
       const docRef = await addDoc(collection(db, 'orders'), orderData);
       setOrderId(docRef.id);
+
+      // Create admin notification
+      await addDoc(collection(db, 'notifications'), {
+        message: `Vous avez une nouvelle commande de ${address.fullName}`,
+        type: 'new_order',
+        read: false,
+        createdAt: new Date().toISOString(),
+        orderId: docRef.id,
+        customerName: address.fullName
+      });
+
       clearCart();
       setStep(3);
     } catch (error) {

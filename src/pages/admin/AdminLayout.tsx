@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, LogOut, Bell, Loader2, Settings } from 'lucide-react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 
@@ -9,6 +9,8 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
@@ -31,12 +33,25 @@ export function AdminLayout() {
     if (!isAuthReady) return;
     // Listen for new orders
     const q = query(collection(db, 'orders'), where('status', '==', 'pending'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribeOrders = onSnapshot(q, (snapshot) => {
       setNewOrdersCount(snapshot.docs.length);
     }, (error) => {
       console.error("Orders snapshot error:", error);
     });
-    return () => unsubscribe();
+
+    // Listen for notifications
+    const qNotif = query(collection(db, 'notifications'), where('read', '==', false));
+    const unsubscribeNotif = onSnapshot(qNotif, (snapshot) => {
+      const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setNotifications(notifs);
+    }, (error) => {
+      console.error("Notifications snapshot error:", error);
+    });
+
+    return () => {
+      unsubscribeOrders();
+      unsubscribeNotif();
+    };
   }, [isAuthReady]);
 
   const handleLogout = async () => {
@@ -104,14 +119,88 @@ export function AdminLayout() {
             {navItems.find(item => item.path === location.pathname || (item.path !== '/admin' && location.pathname.startsWith(item.path)))?.label || 'Administration'}
           </h2>
           <div className="flex items-center gap-6">
-            <Link to="/admin/orders" className="relative p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-50">
-              <Bell className="w-6 h-6" />
-              {newOrdersCount > 0 && (
-                <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
-                  {newOrdersCount}
-                </span>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-50"
+              >
+                <Bell className="w-6 h-6" />
+                {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-4 z-50">
+                  <div className="px-6 pb-4 border-b border-gray-50 flex justify-between items-center">
+                    <h3 className="font-bold text-gray-900">Notifications</h3>
+                    <div className="flex items-center gap-2">
+                      {notifications.length > 0 && (
+                        <button 
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              const promises = notifications.map(n => updateDoc(doc(db, 'notifications', n.id), { read: true }));
+                              await Promise.all(promises);
+                            } catch (err) {
+                              console.error(err);
+                            }
+                          }}
+                          className="text-[9px] text-brand-accent hover:text-brand-ink font-bold uppercase tracking-widest"
+                        >
+                          Tout lire
+                        </button>
+                      )}
+                      <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        {notifications.length}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto no-scrollbar">
+                    {notifications.length === 0 ? (
+                      <div className="px-6 py-10 text-center">
+                        <Bell className="w-8 h-8 text-gray-200 mx-auto mb-3" />
+                        <p className="text-sm text-gray-400">Aucune nouvelle notification</p>
+                      </div>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div 
+                          key={notif.id} 
+                          className="px-6 py-4 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors cursor-pointer"
+                          onClick={async () => {
+                            try {
+                              await updateDoc(doc(db, 'notifications', notif.id), { read: true });
+                              navigate('/admin/orders');
+                              setShowNotifications(false);
+                            } catch (error) {
+                              console.error("Error marking notification as read", error);
+                            }
+                          }}
+                        >
+                          <p className="text-sm text-gray-800 font-medium mb-1">{notif.message}</p>
+                          <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+                            {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <div className="px-6 pt-4 border-t border-gray-50">
+                      <button 
+                        onClick={() => navigate('/admin/orders')}
+                        className="w-full py-2 text-xs font-bold text-brand-accent hover:text-brand-ink transition-colors uppercase tracking-widest"
+                      >
+                        Voir toutes les commandes
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
-            </Link>
+            </div>
             <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
               <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold">
                 A

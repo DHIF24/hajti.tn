@@ -57,5 +57,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if isAuthenticated();
+    }
   }
 }
