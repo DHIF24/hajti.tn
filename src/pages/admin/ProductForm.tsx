@@ -18,6 +18,7 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
     description: '',
     price: 0,
     category: 'decors',
+    gender: 'mixte',
     imageUrl: '',
     images: [],
     videoUrl: '',
@@ -41,6 +42,7 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
         description: product.description,
         price: product.price,
         category: product.category,
+        gender: product.gender || 'mixte',
         imageUrl: product.imageUrl,
         images: product.images || [],
         videoUrl: product.videoUrl || '',
@@ -196,6 +198,21 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
                   <option value="decors">Décors</option>
                 </select>
               </div>
+
+              {formData.category === 'accessoires' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Genre (Accessoires)</label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all"
+                  >
+                    <option value="fille">Fille</option>
+                    <option value="garcon">Garçon</option>
+                    <option value="mixte">Mixte</option>
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

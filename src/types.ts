@@ -9,6 +9,7 @@ export interface Product {
   videoUrl?: string;
   stock: number;
   rating: number;
+  gender?: 'fille' | 'garcon' | 'mixte';
   featured?: boolean;
   promotionPercentage?: number;
 }

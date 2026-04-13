@@ -40,6 +40,7 @@ export function Products() {
   
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
+  const genderFilter = searchParams.get('gender');
   const searchQuery = searchParams.get('q') || '';
   
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -79,6 +80,7 @@ export function Products() {
     return products
       .filter(p => {
         if (categoryFilter && p.category.toLowerCase() !== categoryFilter.toLowerCase()) return false;
+        if (genderFilter && categoryFilter?.toLowerCase() === 'accessoires' && p.gender !== genderFilter) return false;
         if (inStockOnly && p.stock === 0) return false;
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
@@ -349,6 +351,37 @@ export function Products() {
                     </div>
                   </button>
                 </div>
+
+                {/* Gender Section (Only for Accessoires) */}
+                {categoryFilter?.toLowerCase() === 'accessoires' && (
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Genre (Accessoires)</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      {[
+                        { id: null, label: 'Tous les genres' },
+                        { id: 'fille', label: 'Fille' },
+                        { id: 'garcon', label: 'Garçon' },
+                        { id: 'mixte', label: 'Mixte' }
+                      ].map((option) => (
+                        <button
+                          key={option.id || 'all'}
+                          onClick={() => {
+                            if (option.id) {
+                              searchParams.set('gender', option.id);
+                            } else {
+                              searchParams.delete('gender');
+                            }
+                            setSearchParams(searchParams);
+                          }}
+                          className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${genderFilter === option.id || (!genderFilter && option.id === null) ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                        >
+                          <span className="font-bold text-sm">{option.label}</span>
+                          {(genderFilter === option.id || (!genderFilter && option.id === null)) && <Check className="w-5 h-5" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Categories Section (Mobile Only) */}
                 <div className="lg:hidden">
