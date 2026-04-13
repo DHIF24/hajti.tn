@@ -98,7 +98,7 @@ export function Products() {
         if (sortBy === 'price-desc') return b.price - a.price;
         return a.name.localeCompare(b.name);
       });
-  }, [products, categoryFilter, inStockOnly, sortBy, searchQuery]);
+  }, [products, categoryFilter, genderFilter, inStockOnly, sortBy, searchQuery]);
 
   const getCategoryIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -123,7 +123,12 @@ export function Products() {
         <div className="overflow-x-auto no-scrollbar">
           <div className="flex gap-3 min-w-max">
             <button 
-              onClick={() => { searchParams.delete('category'); searchParams.delete('gender'); setSearchParams(searchParams); }}
+              onClick={() => { 
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete('category'); 
+                newParams.delete('gender'); 
+                setSearchParams(newParams); 
+              }}
               className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${!categoryFilter ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
             >
               Tous
@@ -132,9 +137,10 @@ export function Products() {
               <button 
                 key={cat}
                 onClick={() => { 
-                  searchParams.set('category', cat.toLowerCase()); 
-                  if (cat.toLowerCase() !== 'accessoires') searchParams.delete('gender');
-                  setSearchParams(searchParams); 
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.set('category', cat.toLowerCase()); 
+                  if (cat.toLowerCase() !== 'accessoires') newParams.delete('gender');
+                  setSearchParams(newParams); 
                 }}
                 className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
               >
@@ -161,9 +167,10 @@ export function Products() {
                 <button
                   key={sub.id || 'all'}
                   onClick={() => {
-                    if (sub.id) searchParams.set('gender', sub.id);
-                    else searchParams.delete('gender');
-                    setSearchParams(searchParams);
+                    const newParams = new URLSearchParams(searchParams);
+                    if (sub.id) newParams.set('gender', sub.id);
+                    else newParams.delete('gender');
+                    setSearchParams(newParams);
                   }}
                   className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${genderFilter === sub.id || (!genderFilter && sub.id === null) ? 'bg-brand-accent text-white' : 'bg-gray-50 text-brand-ink/40'}`}
                 >
@@ -193,7 +200,11 @@ export function Products() {
 
                 <div className="space-y-1.5">
                   <button 
-                    onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}
+                    onClick={() => { 
+                      const newParams = new URLSearchParams(searchParams);
+                      newParams.delete('category'); 
+                      setSearchParams(newParams); 
+                    }}
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group/item ${!categoryFilter ? 'bg-brand-ink text-white shadow-xl shadow-brand-ink/20' : 'hover:bg-gray-50 text-brand-ink/60 hover:text-brand-ink'}`}
                   >
                     <div className="flex items-center gap-3">
@@ -213,9 +224,10 @@ export function Products() {
                     >
                       <button 
                         onClick={() => { 
-                          searchParams.set('category', cat.toLowerCase()); 
-                          if (cat.toLowerCase() !== 'accessoires') searchParams.delete('gender');
-                          setSearchParams(searchParams); 
+                          const newParams = new URLSearchParams(searchParams);
+                          newParams.set('category', cat.toLowerCase()); 
+                          if (cat.toLowerCase() !== 'accessoires') newParams.delete('gender');
+                          setSearchParams(newParams); 
                         }}
                         className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group/item ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-xl shadow-brand-ink/20' : 'hover:bg-gray-50 text-brand-ink/60 hover:text-brand-ink'}`}
                       >
@@ -253,9 +265,10 @@ export function Products() {
                                   key={sub.id}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    searchParams.set('category', 'accessoires');
-                                    searchParams.set('gender', sub.id);
-                                    setSearchParams(searchParams);
+                                    const newParams = new URLSearchParams(searchParams);
+                                    newParams.set('category', 'accessoires');
+                                    newParams.set('gender', sub.id);
+                                    setSearchParams(newParams);
                                   }}
                                   className={`w-full text-left px-4 py-2 rounded-xl text-xs font-bold transition-all ${genderFilter === sub.id ? 'text-brand-accent bg-brand-accent/5' : 'text-brand-ink/40 hover:text-brand-ink hover:bg-gray-50'}`}
                                 >
@@ -446,12 +459,13 @@ export function Products() {
                         <button
                           key={option.id || 'all'}
                           onClick={() => {
+                            const newParams = new URLSearchParams(searchParams);
                             if (option.id) {
-                              searchParams.set('gender', option.id);
+                              newParams.set('gender', option.id);
                             } else {
-                              searchParams.delete('gender');
+                              newParams.delete('gender');
                             }
-                            setSearchParams(searchParams);
+                            setSearchParams(newParams);
                           }}
                           className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${genderFilter === option.id || (!genderFilter && option.id === null) ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
                         >
@@ -468,7 +482,11 @@ export function Products() {
                   <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Catégories</h3>
                   <div className="grid grid-cols-1 gap-3">
                     <button
-                      onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}
+                      onClick={() => { 
+                        const newParams = new URLSearchParams(searchParams);
+                        newParams.delete('category'); 
+                        setSearchParams(newParams); 
+                      }}
                       className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${!categoryFilter ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
                     >
                       <span className="font-bold text-sm">Tous les produits</span>
@@ -477,7 +495,11 @@ export function Products() {
                     {categories.map((cat) => (
                       <button
                         key={cat}
-                        onClick={() => { searchParams.set('category', cat.toLowerCase()); setSearchParams(searchParams); }}
+                        onClick={() => { 
+                          const newParams = new URLSearchParams(searchParams);
+                          newParams.set('category', cat.toLowerCase()); 
+                          setSearchParams(newParams); 
+                        }}
                         className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
                       >
                         <span className="font-bold text-sm capitalize">{cat}</span>
