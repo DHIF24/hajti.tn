@@ -39,9 +39,9 @@ export function Navbar() {
   }, [lastAdded, controls]);
 
   return (
-    <nav className="bg-white/90 backdrop-blur-md border-b border-brand-ink/5 sticky top-0 z-50 transition-all duration-300 shadow-sm">
-      <div className="mx-4 md:mx-[120px]">
-        <div className="flex justify-between items-center h-16 md:h-24">
+    <nav className="h-14 md:h-24 bg-white md:bg-white/90 md:backdrop-blur-md border-none md:border-b border-brand-ink/5 sticky top-0 z-50 transition-all duration-300 shadow-none md:shadow-sm">
+      <div className="mx-4 md:mx-[120px] h-full">
+        <div className="flex justify-between items-center h-full">
           
           {/* Left Side: Logo & Navigation */}
           <div className="flex items-center space-x-12">
