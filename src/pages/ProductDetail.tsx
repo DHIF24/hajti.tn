@@ -95,7 +95,7 @@ export function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-20">
         {/* Image Gallery */}
-        <div className="lg:col-span-7 flex flex-col md:flex-row gap-4 md:gap-6">
+        <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-4 md:gap-6">
           {/* Thumbnails */}
           <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar pb-2 md:pb-0">
             {allImages.map((img, idx) => (
