@@ -41,7 +41,7 @@ export function Navbar() {
   return (
     <nav className="bg-white/90 backdrop-blur-md border-b border-brand-ink/5 sticky top-0 z-50 transition-all duration-300 shadow-sm">
       <div className="mx-4 md:mx-[120px]">
-        <div className="flex justify-between items-center h-24">
+        <div className="flex justify-between items-center h-16 md:h-24">
           
           {/* Left Side: Logo & Navigation */}
           <div className="flex items-center space-x-12">

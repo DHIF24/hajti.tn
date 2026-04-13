@@ -116,7 +116,7 @@ export function Products() {
   return (
     <div className="w-full min-h-screen bg-gray-50/30">
       {/* Mobile Category Scroll */}
-      <div className="lg:hidden bg-white border-b border-gray-100 sticky top-24 z-40 overflow-x-auto no-scrollbar py-4 px-4">
+      <div className="lg:hidden bg-white border-b border-gray-100 sticky top-16 z-40 overflow-x-auto no-scrollbar py-4 px-4">
         <div className="flex gap-3 min-w-max">
           <button 
             onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}
