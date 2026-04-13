@@ -78,10 +78,14 @@ export function Products() {
   }, []);
 
   const filteredProducts = useMemo(() => {
+    const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    
     return products
       .filter(p => {
-        if (categoryFilter && p.category.toLowerCase() !== categoryFilter.toLowerCase()) return false;
-        if (genderFilter && categoryFilter?.toLowerCase() === 'accessoires' && p.gender !== genderFilter) return false;
+        if (categoryFilter) {
+          if (normalize(p.category) !== normalize(categoryFilter)) return false;
+        }
+        if (genderFilter && normalize(categoryFilter || '') === 'accessoires' && p.gender !== genderFilter) return false;
         if (inStockOnly && p.stock === 0) return false;
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
