@@ -191,12 +191,9 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black outline-none transition-all"
                 >
-                  <option value="decors">Décors</option>
-                  <option value="salle-de-bain">Salle de bain</option>
-                  <option value="cuisine">Cuisine</option>
-                  <option value="art">Art de table</option>
+                  <option value="accessoires">Accessoires</option>
                   <option value="rangement">Rangement</option>
-                  <option value="offres">Offres</option>
+                  <option value="decors">Décors</option>
                 </select>
               </div>
 

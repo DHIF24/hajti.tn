@@ -24,7 +24,7 @@ import {
   Watch
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 type ViewMode = 'grid-3' | 'list';
 
@@ -72,7 +72,7 @@ export function Products() {
   }, []);
 
   const categories = useMemo(() => {
-    return ['Accessoires', 'Rangement'];
+    return ['Accessoires', 'Rangement', 'Décors'];
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -285,6 +285,108 @@ export function Products() {
           </div>
         </div>
       </div>
+
+      {/* Filter & Sort Drawer */}
+      <AnimatePresence>
+        {isFilterOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFilterOpen(false)}
+              className="fixed inset-0 bg-brand-ink/40 backdrop-blur-sm z-[60]"
+            />
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
+            >
+              <div className="p-8 border-b border-gray-100 flex items-center justify-between">
+                <h2 className="text-2xl font-display font-bold text-brand-ink uppercase tracking-wider">Filtrer & Trier</h2>
+                <button 
+                  onClick={() => setIsFilterOpen(false)}
+                  className="p-3 hover:bg-gray-50 rounded-2xl transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-grow overflow-y-auto p-8 space-y-10">
+                {/* Sort Section */}
+                <div>
+                  <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Trier par</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { id: 'name', label: 'Nom (A-Z)' },
+                      { id: 'price-asc', label: 'Prix : Croissant' },
+                      { id: 'price-desc', label: 'Prix : Décroissant' }
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setSortBy(option.id)}
+                        className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${sortBy === option.id ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                      >
+                        <span className="font-bold text-sm">{option.label}</span>
+                        {sortBy === option.id && <Check className="w-5 h-5" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Availability Section */}
+                <div>
+                  <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Disponibilité</h3>
+                  <button
+                    onClick={() => setInStockOnly(!inStockOnly)}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${inStockOnly ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                  >
+                    <span className="font-bold text-sm">En stock uniquement</span>
+                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${inStockOnly ? 'bg-brand-accent border-brand-accent' : 'border-gray-200'}`}>
+                      {inStockOnly && <Check className="w-4 h-4 text-white" />}
+                    </div>
+                  </button>
+                </div>
+
+                {/* Categories Section (Mobile Only) */}
+                <div className="lg:hidden">
+                  <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Catégories</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    <button
+                      onClick={() => { searchParams.delete('category'); setSearchParams(searchParams); }}
+                      className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${!categoryFilter ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                    >
+                      <span className="font-bold text-sm">Tous les produits</span>
+                      {!categoryFilter && <Check className="w-5 h-5" />}
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => { searchParams.set('category', cat.toLowerCase()); setSearchParams(searchParams); }}
+                        className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                      >
+                        <span className="font-bold text-sm capitalize">{cat}</span>
+                        {categoryFilter?.toLowerCase() === cat.toLowerCase() && <Check className="w-5 h-5" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8 border-t border-gray-100">
+                <button 
+                  onClick={() => setIsFilterOpen(false)}
+                  className="w-full py-5 bg-brand-ink text-white rounded-[2rem] font-bold uppercase tracking-widest hover:bg-brand-accent transition-all duration-500 shadow-xl shadow-brand-ink/20"
+                >
+                  Afficher les résultats
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
