@@ -44,10 +44,9 @@ service cloud.firestore {
 
     // Orders Collection
     match /orders/{orderId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && 
-                    request.resource.data.userId == request.auth.uid &&
-                    request.resource.data.status == 'pending';
+      allow read: if (isAuthenticated() && isOwner(resource.data.userId)) || isAdmin();
+      allow create: if (isAuthenticated() && request.resource.data.userId == request.auth.uid) || 
+                    (!isAuthenticated() && request.resource.data.userId == 'guest');
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
@@ -61,7 +60,7 @@ service cloud.firestore {
     // Notifications Collection
     match /notifications/{notificationId} {
       allow read, update, delete: if isAdmin();
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() || request.resource.data.type == 'new_order';
     }
   }
 }

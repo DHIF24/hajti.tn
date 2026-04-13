@@ -14,6 +14,7 @@ export function Checkout() {
   
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const SHIPPING_FEE = 7;
 
@@ -37,11 +38,18 @@ export function Checkout() {
 
   const handlePlaceOrder = async () => {
     setLoading(true);
+    setError(null);
     try {
       const orderData = {
         userId: user?.uid || 'guest',
         customerEmail: user?.email || 'guest@hajti.tn',
-        items,
+        items: items.map(item => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          imageUrl: item.imageUrl
+        })),
         subtotal: total,
         shippingFee: SHIPPING_FEE,
         total: total + SHIPPING_FEE,
@@ -67,7 +75,19 @@ export function Checkout() {
       setStep(3);
     } catch (error) {
       console.error("Error placing order", error);
-      alert("Une erreur est survenue lors de la commande. Veuillez réessayer.");
+      // Specific error handling for Firestore
+      const errInfo = {
+        error: error instanceof Error ? error.message : String(error),
+        operationType: 'create',
+        path: 'orders',
+        authInfo: {
+          userId: user?.uid,
+          email: user?.email,
+          isAnonymous: user?.isAnonymous
+        }
+      };
+      console.error('Firestore Error Details:', JSON.stringify(errInfo));
+      setError("Une erreur est survenue lors de la validation de votre commande. Veuillez vérifier votre connexion ou réessayer plus tard.");
     } finally {
       setLoading(false);
     }
@@ -221,6 +241,13 @@ export function Checkout() {
               <span className="text-sm font-bold text-brand-ink">Total à payer</span>
               <span className="text-lg font-bold text-brand-accent">{(total + SHIPPING_FEE).toFixed(2)} TND</span>
             </div>
+            
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-xs font-medium mb-4">
+                {error}
+              </div>
+            )}
+
             <button 
                     onClick={handlePlaceOrder} 
                     disabled={loading}
