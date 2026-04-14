@@ -53,7 +53,11 @@ export function AdminLogin() {
         navigate('/admin');
       } catch (err: any) {
         console.error("Admin login error", err);
-        setError('Erreur de connexion au serveur: ' + err.message);
+        let msg = err.message;
+        if (err.code === 'auth/unauthorized-domain') {
+          msg = "Ce domaine n'est pas autorisé dans la console Firebase. Veuillez ajouter ce domaine aux domaines autorisés dans l'authentification Firebase.";
+        }
+        setError('Erreur de connexion: ' + msg);
       } finally {
         setLoading(false);
       }
@@ -64,7 +68,7 @@ export function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen flex items-center justify-center bg-white px-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

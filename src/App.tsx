@@ -58,7 +58,7 @@ function AppContent() {
   const { itemCount } = useCart();
 
   return (
-    <div className="flex flex-col min-h-screen text-brand-ink font-sans selection:bg-brand-accent/20 bg-gray-50/50">
+    <div className="flex flex-col min-h-screen text-brand-ink font-sans selection:bg-brand-accent/20 bg-white">
       {!isAdminRoute && <Navbar />}
       <main className={`flex-grow ${!isAdminRoute ? 'max-w-full md:mx-[120px] md:bg-white md:shadow-sm md:my-8 md:rounded-xl overflow-hidden' : ''}`}>
         <Routes>

@@ -13,7 +13,6 @@ import {
   Tag, 
   LayoutGrid, 
   ChevronRight, 
-  Sparkles, 
   Truck,
   Home,
   Coffee,
@@ -46,7 +45,6 @@ export function Products() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState('name'); // 'name', 'price-asc', 'price-desc'
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [showOffers, setShowOffers] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   useEffect(() => {
@@ -121,7 +119,7 @@ export function Products() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50/30">
+    <div className="w-full min-h-screen bg-white">
       {/* Mobile Category Scroll */}
       <div className="lg:hidden bg-white border-b border-gray-100 sticky top-14 z-40 pt-0 pb-4 px-4 m-0">
         <div className="overflow-x-auto no-scrollbar">
@@ -286,41 +284,6 @@ export function Products() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            {/* Offers Section */}
-            <div className="bg-brand-ink rounded-[2.5rem] p-8 shadow-2xl shadow-brand-ink/30 relative overflow-hidden group mt-8">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-brand-accent/20 rounded-full -mr-20 -mt-20 blur-2xl group-hover:bg-brand-accent/30 transition-colors duration-700" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16 blur-xl" />
-              
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-10 h-10 bg-brand-accent text-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-accent/20">
-                    <Tag className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-display font-bold text-white uppercase tracking-wider">Nos Offres</h3>
-                </div>
-
-                {showOffers && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl text-center mb-6"
-                  >
-                    <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Sparkles className="w-6 h-6 text-brand-accent/40" />
-                    </div>
-                    <p className="text-white/60 text-xs font-medium">Aucune offre pour le moment</p>
-                  </motion.div>
-                )}
-
-                <button 
-                  onClick={() => setShowOffers(!showOffers)}
-                  className="w-full py-4 bg-white text-brand-ink rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-brand-accent hover:text-white transition-all duration-500 shadow-xl"
-                >
-                  {showOffers ? 'Masquer les offres' : 'Voir toutes les offres'}
-                </button>
               </div>
             </div>
           </aside>

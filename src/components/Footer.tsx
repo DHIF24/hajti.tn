@@ -49,10 +49,11 @@ export function Footer() {
           <p className="text-white/30 text-[10px] tracking-[0.2em] uppercase font-medium">
             &copy; {new Date().getFullYear()} HAJTI.TN. TOUS DROITS RÉSERVÉS.
           </p>
-          <div className="flex space-x-8 text-[10px] text-white/30 tracking-[0.2em] uppercase font-medium">
-            <a href="#" className="hover:text-white transition-colors">CONFIDENTIALITÉ</a>
-            <a href="#" className="hover:text-white transition-colors">CONDITIONS</a>
-          </div>
+            <div className="flex space-x-8 text-[10px] text-white/30 tracking-[0.2em] uppercase font-medium">
+              <a href="#" className="hover:text-white transition-colors">CONFIDENTIALITÉ</a>
+              <a href="#" className="hover:text-white transition-colors">CONDITIONS</a>
+              <Link to="/admin/login" className="hover:text-white transition-colors">ADMIN</Link>
+            </div>
         </div>
       </div>
     </footer>
