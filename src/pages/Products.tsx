@@ -324,7 +324,7 @@ export function Products() {
             {loading ? (
               <div className={getGridClass()}>
                 {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className={`animate-pulse bg-white rounded-[2.5rem] ${viewMode === 'list' ? 'h-64 w-full' : 'aspect-[4/5]'}`} />
+                  <div key={i} className={`animate-pulse bg-white rounded-[2.5rem] ${viewMode === 'list' ? 'h-64 w-full' : 'aspect-square'}`} />
                 ))}
               </div>
             ) : (

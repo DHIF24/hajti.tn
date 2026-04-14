@@ -56,9 +56,9 @@ export function ProductDetail() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="aspect-square bg-gray-100 rounded-3xl"></div>
-          <div className="space-y-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-5 aspect-square bg-gray-100 rounded-3xl max-w-md"></div>
+          <div className="lg:col-span-7 space-y-6 py-8">
             <div className="h-4 bg-gray-100 w-1/4"></div>
             <div className="h-10 bg-gray-100 w-3/4"></div>
             <div className="h-6 bg-gray-100 w-1/4"></div>
@@ -93,16 +93,16 @@ export function ProductDetail() {
         <span className="text-brand-ink">{product.name}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
         {/* Image Gallery */}
-        <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-4 md:gap-6">
+        <div className="lg:col-span-5 flex flex-col-reverse md:flex-row gap-4 md:gap-6">
           {/* Thumbnails */}
-          <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[600px] no-scrollbar pb-2 md:pb-0">
+          <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[400px] md:max-h-[500px] no-scrollbar pb-2 md:pb-0">
             {allImages.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveImage(img)}
-                className={`relative w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 ${activeImage === img ? 'border-brand-accent scale-95 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                className={`relative w-14 h-14 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 ${activeImage === img ? 'border-brand-accent scale-95 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
                 <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-cover" />
               </button>
@@ -110,15 +110,15 @@ export function ProductDetail() {
             {product.videoUrl && (
               <button
                 onClick={() => setActiveImage('video')}
-                className={`relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 flex items-center justify-center bg-brand-ink ${activeImage === 'video' ? 'border-brand-accent scale-95 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                className={`relative w-14 h-14 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 flex items-center justify-center bg-brand-ink ${activeImage === 'video' ? 'border-brand-accent scale-95 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
-                <Play className="w-8 h-8 text-white" />
+                <Play className="w-6 h-6 text-white" />
               </button>
             )}
           </div>
 
           {/* Main View */}
-          <div className="flex-grow relative aspect-square bg-white rounded-3xl md:rounded-[2.5rem] overflow-hidden shadow-sm border border-brand-ink/5">
+          <div className="flex-grow relative aspect-square bg-white rounded-2xl md:rounded-[2rem] overflow-hidden shadow-sm border border-brand-ink/5 max-w-md mx-auto lg:mx-0">
             <AnimatePresence mode="wait">
               {activeImage === 'video' ? (
                 <motion.div
@@ -173,7 +173,7 @@ export function ProductDetail() {
         </div>
 
         {/* Product Info */}
-        <div className="lg:col-span-5 flex flex-col justify-center py-0 md:py-4">
+        <div className="lg:col-span-7 flex flex-col justify-center py-0 md:py-4">
           <div className="mb-6 md:mb-8">
             <span className="text-brand-accent text-[10px] md:text-[12px] uppercase tracking-[0.3em] font-bold mb-2 md:mb-4 block">
               {product.category}

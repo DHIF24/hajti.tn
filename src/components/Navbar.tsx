@@ -57,6 +57,7 @@ export function Navbar() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8 text-[14px] tracking-widest text-brand-ink/70 font-medium uppercase">
               <Link to="/" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Accueil</Link>
+              <Link to="/admin/login" className="nav-link-underline py-1 hover:text-brand-ink transition-colors">Admin</Link>
             </div>
           </div>
 
