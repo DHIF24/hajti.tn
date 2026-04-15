@@ -1,0 +1,494 @@
+import { useState, useEffect, useMemo } from 'react';
+import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { Product } from '../types';
+import { ProductCard } from '../components/ProductCard';
+import { 
+  Grid3X3, 
+  AlignJustify, 
+  X, 
+  ArrowRight, 
+  Check, 
+  Search, 
+  Tag, 
+  LayoutGrid, 
+  ChevronRight, 
+  Truck,
+  Home,
+  Coffee,
+  Bath,
+  Box,
+  Palette,
+  Utensils,
+  Watch
+} from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+
+type ViewMode = 'grid-3' | 'list';
+
+export function Products() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    heroBannerUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
+    heroTitle: "NEW COLLECTION SUMMER",
+    heroSubtitle: "OVERSIZED T-SHIRT URBAN WEAR"
+  });
+  const [viewMode, setViewMode] = useState<ViewMode>('grid-3');
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFilter = searchParams.get('category');
+  const genderFilter = searchParams.get('gender');
+  const searchQuery = searchParams.get('q') || '';
+  
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'price-asc', 'price-desc'
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Settings
+        const settingsRef = doc(db, 'settings', 'general');
+        const settingsSnap = await getDoc(settingsRef);
+        if (settingsSnap.exists()) {
+          setSettings(settingsSnap.data() as any);
+        }
+
+        // Fetch Products
+        const q = query(collection(db, 'products'), orderBy('name'));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const categories = useMemo(() => {
+    return ['Accessoires', 'Rangement', 'Décors'];
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    
+    return products
+      .filter(p => {
+        if (categoryFilter) {
+          if (normalize(p.category) !== normalize(categoryFilter)) return false;
+        }
+        if (genderFilter && normalize(categoryFilter || '') === 'accessoires' && p.gender !== genderFilter) return false;
+        if (inStockOnly && p.stock === 0) return false;
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          return (
+            p.name.toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query) ||
+            (p.description && p.description.toLowerCase().includes(query))
+          );
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'price-asc') return a.price - b.price;
+        if (sortBy === 'price-desc') return b.price - a.price;
+        return a.name.localeCompare(b.name);
+      });
+  }, [products, categoryFilter, genderFilter, inStockOnly, sortBy, searchQuery]);
+
+  const getCategoryIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('décors') || n.includes('decor')) return <Palette className="w-4 h-4" />;
+    if (n.includes('cuisine')) return <Utensils className="w-4 h-4" />;
+    if (n.includes('bain')) return <Bath className="w-4 h-4" />;
+    if (n.includes('rangement')) return <Box className="w-4 h-4" />;
+    if (n.includes('accessoires')) return <Watch className="w-4 h-4" />;
+    if (n.includes('art')) return <Coffee className="w-4 h-4" />;
+    return <Tag className="w-4 h-4" />;
+  };
+
+  const getGridClass = () => {
+    if (viewMode === 'list') return 'flex flex-col gap-y-12';
+    return 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-16';
+  };
+
+  return (
+    <div className="w-full min-h-screen bg-white">
+      {/* Mobile Category Scroll */}
+      <div className="lg:hidden bg-white border-b border-gray-100 sticky top-14 z-40 pt-0 pb-0 px-4 m-0">
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex gap-3 min-w-max">
+            <button 
+              onClick={() => { 
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete('category'); 
+                newParams.delete('gender'); 
+                setSearchParams(newParams); 
+              }}
+              className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${!categoryFilter ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
+            >
+              Tous
+            </button>
+            {categories.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => { 
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.set('category', cat.toLowerCase()); 
+                  if (cat.toLowerCase() !== 'accessoires') newParams.delete('gender');
+                  setSearchParams(newParams); 
+                }}
+                className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-100 text-brand-ink/60'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile Sub-categories for Accessoires */}
+        <AnimatePresence>
+          {categoryFilter?.toLowerCase() === 'accessoires' && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="flex gap-2 mt-3 pt-3 border-t border-gray-50 overflow-x-auto no-scrollbar"
+            >
+              {[
+                { id: null, label: 'Tous' },
+                { id: 'fille', label: 'Femme' },
+                { id: 'garcon', label: 'Homme' }
+              ].map(sub => (
+                <button
+                  key={sub.id || 'all'}
+                  onClick={() => {
+                    const newParams = new URLSearchParams(searchParams);
+                    if (sub.id) newParams.set('gender', sub.id);
+                    else newParams.delete('gender');
+                    setSearchParams(newParams);
+                  }}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${genderFilter === sub.id || (!genderFilter && sub.id === null) ? 'bg-brand-accent text-white' : 'bg-gray-50 text-brand-ink/40'}`}
+                >
+                  {sub.label}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div id="shop-section" className="max-w-full mx-auto px-4 sm:px-4 lg:px-6 py-0 lg:py-0">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar - Desktop Only */}
+          <aside className="hidden lg:block lg:w-72 flex-shrink-0 space-y-10" style={{ position: 'sticky', top: 0, alignSelf: 'flex-start', zIndex: 30 }}>
+            {/* Categories Section */}
+            <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/30 border border-gray-50 overflow-hidden relative group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/5 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover:scale-110" />
+              
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-brand-ink text-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand-ink/20">
+                    <LayoutGrid className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-display font-bold text-brand-ink uppercase tracking-wider">Nos Catégories</h3>
+                </div>
+
+                <div className="space-y-1.5">
+                  <button 
+                    onClick={() => { 
+                      const newParams = new URLSearchParams(searchParams);
+                      newParams.delete('category'); 
+                      setSearchParams(newParams); 
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group/item ${!categoryFilter ? 'bg-brand-ink text-white shadow-xl shadow-brand-ink/20' : 'hover:bg-gray-50 text-brand-ink/60 hover:text-brand-ink'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl transition-colors ${!categoryFilter ? 'bg-white/10' : 'bg-gray-100 group-hover/item:bg-white'}`}>
+                        <Home className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-bold tracking-wide">Tous les produits</span>
+                    </div>
+                  </button>
+                  
+                  {categories.map(cat => (
+                    <div 
+                      key={cat}
+                      onMouseEnter={() => setHoveredCategory(cat.toLowerCase())}
+                      onMouseLeave={() => setHoveredCategory(null)}
+                      className="relative"
+                    >
+                      <button 
+                        onClick={() => { 
+                          const newParams = new URLSearchParams(searchParams);
+                          newParams.set('category', cat.toLowerCase()); 
+                          if (cat.toLowerCase() !== 'accessoires') newParams.delete('gender');
+                          setSearchParams(newParams); 
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group/item ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-brand-ink text-white shadow-xl shadow-brand-ink/20' : 'hover:bg-gray-50 text-brand-ink/60 hover:text-brand-ink'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-xl transition-colors ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'bg-white/10' : 'bg-gray-100 group-hover/item:bg-white'}`}>
+                            {getCategoryIcon(cat)}
+                          </div>
+                          <span className="text-sm font-bold tracking-wide capitalize">{cat}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {cat.toLowerCase() === 'accessoires' && (
+                            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${hoveredCategory === 'accessoires' ? 'rotate-90' : ''}`} />
+                          )}
+                          {categoryFilter?.toLowerCase() === cat.toLowerCase() && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Sub-menu for Accessoires */}
+                      {cat.toLowerCase() === 'accessoires' && (
+                        <AnimatePresence>
+                          {(hoveredCategory === 'accessoires' || (categoryFilter?.toLowerCase() === 'accessoires')) && (
+                            <motion.div 
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden pl-12 space-y-1 mt-1"
+                            >
+                              {[
+                                { id: 'fille', label: 'Femme' },
+                                { id: 'garcon', label: 'Homme' }
+                              ].map(sub => (
+                                <button
+                                  key={sub.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newParams = new URLSearchParams(searchParams);
+                                    newParams.set('category', 'accessoires');
+                                    newParams.set('gender', sub.id);
+                                    setSearchParams(newParams);
+                                  }}
+                                  className={`w-full text-left px-4 py-2 rounded-xl text-xs font-bold transition-all ${genderFilter === sub.id ? 'text-brand-accent bg-brand-accent/5' : 'text-brand-ink/40 hover:text-brand-ink hover:bg-gray-50'}`}
+                                >
+                                  {sub.label}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-grow">
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-[2rem] px-4 sm:px-8 py-5 mb-8 md:mb-12 shadow-xl shadow-gray-200/20 border border-gray-50 text-[11px] tracking-[0.2em] text-brand-ink/50 uppercase font-bold gap-4 sm:gap-0">
+              <div className="hidden sm:flex gap-6 border-r border-brand-ink/10 pr-8 w-auto justify-start">
+                <Grid3X3 
+                  className={`w-5 h-5 cursor-pointer transition-all duration-500 ${viewMode === 'grid-3' ? 'text-brand-accent scale-125' : 'text-brand-ink/20 hover:text-brand-ink'}`} 
+                  strokeWidth={2.5} 
+                  onClick={() => setViewMode('grid-3')}
+                />
+                <AlignJustify 
+                  className={`w-5 h-5 cursor-pointer transition-all duration-500 ${viewMode === 'list' ? 'text-brand-accent scale-125' : 'text-brand-ink/20 hover:text-brand-ink'}`} 
+                  strokeWidth={2.5} 
+                  onClick={() => setViewMode('list')}
+                />
+              </div>
+              
+              <div className="hidden md:block flex-grow text-center text-brand-ink/30 font-bold">
+                {loading ? '...' : filteredProducts.length} Produits trouvés
+              </div>
+              
+              <div 
+                className="sm:border-l border-brand-ink/10 sm:pl-8 cursor-pointer hover:text-brand-accent transition-all duration-300 flex items-center gap-3 group w-full sm:w-auto justify-center sm:justify-end"
+                onClick={() => setIsFilterOpen(true)}
+              >
+                <span className="group-hover:translate-x-[-4px] transition-transform">Filtrer & Trier</span>
+                <div className="w-8 h-8 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-brand-accent group-hover:text-white transition-colors">
+                  <ChevronRight className="w-4 h-4 rotate-90" />
+                </div>
+              </div>
+            </div>
+
+            {/* Product Grid */}
+            {loading ? (
+              <div className={getGridClass()}>
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className={`animate-pulse bg-white rounded-[2.5rem] ${viewMode === 'list' ? 'h-64 w-full' : 'aspect-square'}`} />
+                ))}
+              </div>
+            ) : (
+              <div className={getGridClass()}>
+                {filteredProducts.map((product, index) => (
+                  <ProductCard key={product.id} product={product} listView={viewMode === 'list'} />
+                ))}
+              </div>
+            )}
+            
+            {!loading && filteredProducts.length === 0 && (
+              <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-gray-200">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-8 h-8 text-gray-300" />
+                </div>
+                <h3 className="text-xl font-display font-bold text-brand-ink mb-2">Aucun produit trouvé</h3>
+                <p className="text-brand-ink/40 text-sm">Essayez de modifier vos filtres ou votre recherche.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Filter & Sort Drawer */}
+      <AnimatePresence>
+        {isFilterOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFilterOpen(false)}
+              className="fixed inset-0 bg-brand-ink/40 backdrop-blur-sm z-[60]"
+            />
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
+            >
+              <div className="p-8 border-b border-gray-100 flex items-center justify-between">
+                <h2 className="text-2xl font-display font-bold text-brand-ink uppercase tracking-wider">Filtrer & Trier</h2>
+                <button 
+                  onClick={() => setIsFilterOpen(false)}
+                  className="p-3 hover:bg-gray-50 rounded-2xl transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-grow overflow-y-auto p-8 space-y-10">
+                {/* Sort Section */}
+                <div>
+                  <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Trier par</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { id: 'name', label: 'Nom (A-Z)' },
+                      { id: 'price-asc', label: 'Prix : Croissant' },
+                      { id: 'price-desc', label: 'Prix : Décroissant' }
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setSortBy(option.id)}
+                        className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${sortBy === option.id ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                      >
+                        <span className="font-bold text-sm">{option.label}</span>
+                        {sortBy === option.id && <Check className="w-5 h-5" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Availability Section */}
+                <div>
+                  <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Disponibilité</h3>
+                  <button
+                    onClick={() => setInStockOnly(!inStockOnly)}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${inStockOnly ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                  >
+                    <span className="font-bold text-sm">En stock uniquement</span>
+                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${inStockOnly ? 'bg-brand-accent border-brand-accent' : 'border-gray-200'}`}>
+                      {inStockOnly && <Check className="w-4 h-4 text-white" />}
+                    </div>
+                  </button>
+                </div>
+
+                {/* Gender Section (Only for Accessoires) */}
+                {categoryFilter?.toLowerCase() === 'accessoires' && (
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Genre (Accessoires)</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      {[
+                        { id: null, label: 'Tous les genres' },
+                        { id: 'fille', label: 'Femme' },
+                        { id: 'garcon', label: 'Homme' },
+                        { id: 'mixte', label: 'Mixte' }
+                      ].map((option) => (
+                        <button
+                          key={option.id || 'all'}
+                          onClick={() => {
+                            const newParams = new URLSearchParams(searchParams);
+                            if (option.id) {
+                              newParams.set('gender', option.id);
+                            } else {
+                              newParams.delete('gender');
+                            }
+                            setSearchParams(newParams);
+                          }}
+                          className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${genderFilter === option.id || (!genderFilter && option.id === null) ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                        >
+                          <span className="font-bold text-sm">{option.label}</span>
+                          {(genderFilter === option.id || (!genderFilter && option.id === null)) && <Check className="w-5 h-5" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Categories Section (Mobile Only) */}
+                <div className="lg:hidden">
+                  <h3 className="text-sm font-bold text-brand-ink/40 uppercase tracking-[0.2em] mb-6">Catégories</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    <button
+                      onClick={() => { 
+                        const newParams = new URLSearchParams(searchParams);
+                        newParams.delete('category'); 
+                        setSearchParams(newParams); 
+                      }}
+                      className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${!categoryFilter ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                    >
+                      <span className="font-bold text-sm">Tous les produits</span>
+                      {!categoryFilter && <Check className="w-5 h-5" />}
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => { 
+                          const newParams = new URLSearchParams(searchParams);
+                          newParams.set('category', cat.toLowerCase()); 
+                          setSearchParams(newParams); 
+                        }}
+                        className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${categoryFilter?.toLowerCase() === cat.toLowerCase() ? 'border-brand-accent bg-brand-accent/5 text-brand-accent' : 'border-gray-100 text-brand-ink/60 hover:border-gray-200'}`}
+                      >
+                        <span className="font-bold text-sm capitalize">{cat}</span>
+                        {categoryFilter?.toLowerCase() === cat.toLowerCase() && <Check className="w-5 h-5" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8 border-t border-gray-100">
+                <button 
+                  onClick={() => setIsFilterOpen(false)}
+                  className="w-full py-5 bg-brand-ink text-white rounded-[2rem] font-bold uppercase tracking-widest hover:bg-brand-accent transition-all duration-500 shadow-xl shadow-brand-ink/20"
+                >
+                  Afficher les résultats
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
